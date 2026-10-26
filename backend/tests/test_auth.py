@@ -4,7 +4,7 @@ from sqlalchemy import select
 
 from app.db.models import SessionRecord, User
 
-PASSWORD = "Correct-Horse-7!"
+PASSWORD = "Correct-Horse-7!"  # pragma: allowlist secret
 
 
 def csrf(client) -> str:
@@ -76,12 +76,18 @@ def test_invalid_login_is_generic(client) -> None:
     setup_admin(client)
     invalid_password = client.post(
         "/v1/auth/login",
-        json={"email": "admin@example.test", "password": "wrong-password"},
+        json={
+            "email": "admin@example.test",
+            "password": "wrong-password",  # pragma: allowlist secret
+        },
         headers={"X-CSRF-Token": csrf(client)},
     )
     unknown_email = client.post(
         "/v1/auth/login",
-        json={"email": "missing@example.test", "password": "wrong-password"},
+        json={
+            "email": "missing@example.test",
+            "password": "wrong-password",  # pragma: allowlist secret
+        },
         headers={"X-CSRF-Token": csrf(client)},
     )
 

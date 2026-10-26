@@ -11,7 +11,10 @@ _SENSITIVE_KEY = re.compile(
     r"(password|passwd|secret|token|authorization|cookie|api[_-]?key|audio|transcript|speech)",
     re.IGNORECASE,
 )
-_SENSITIVE_NAMES = r"password(?:_hash)?|passwd|secret|token|authorization|cookie|api[_-]?key|audio|transcript|speech"
+_SENSITIVE_NAMES = (
+    r"password(?:_hash)?|passwd|secret|token|authorization|cookie|"
+    r"api[_-]?key|audio|transcript|speech"
+)
 _SENSITIVE_ASSIGNMENT = re.compile(
     rf"(?i)({_SENSITIVE_NAMES})\s*[:=]\s*.*?"
     rf"(?=\s+(?:{_SENSITIVE_NAMES})\s*[:=]|\Z)"

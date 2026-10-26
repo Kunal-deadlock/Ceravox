@@ -12,7 +12,7 @@ def test_authentication_values_are_redacted_from_structured_logs() -> None:
         __file__,
         1,
         "token=%s password_hash=%s",
-        ("raw-token", "raw-password-hash"),
+        ("raw-token", "raw-password-hash"),  # pragma: allowlist secret
         None,
     )
 
@@ -20,7 +20,11 @@ def test_authentication_values_are_redacted_from_structured_logs() -> None:
 
     assert "raw-token" not in output
     assert "raw-password-hash" not in output
-    assert redact({"cookie": "raw-cookie", "password_hash": "raw-hash"}) == {
+    values = {
+        "cookie": "raw-cookie",
+        "password_hash": "raw-hash",  # pragma: allowlist secret
+    }
+    assert redact(values) == {
         "cookie": "[REDACTED]",
         "password_hash": "[REDACTED]",
     }
