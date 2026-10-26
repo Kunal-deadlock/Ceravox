@@ -5,6 +5,7 @@ services:
       CERAVOX_APP_NAME: Ceravox API
       CERAVOX_ENVIRONMENT: development
       CERAVOX_LOG_LEVEL: INFO
+      CERAVOX_DATABASE_URL: sqlite:///./ceravox.db
       CERAVOX_DASHBOARD_URL: http://127.0.0.1:5173
       CERAVOX_OLLAMA_URL: http://ollama:11434
     ports:

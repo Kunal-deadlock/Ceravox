@@ -3,11 +3,12 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.api.auth import router as auth_router
 from app.api.health import router as health_router
 from app.core.config import get_settings
 from app.core.logging import configure_logging
@@ -31,11 +32,12 @@ def create_app() -> FastAPI:
     application.add_middleware(
         CORSMiddleware,
         allow_origins=[settings.dashboard_url],
-        allow_credentials=False,
-        allow_methods=["GET"],
-        allow_headers=["*"],
+        allow_credentials=True,
+        allow_methods=["GET", "POST"],
+        allow_headers=["Content-Type", "X-CSRF-Token"],
     )
     application.include_router(health_router)
+    application.include_router(auth_router)
 
     @application.exception_handler(status.HTTP_404_NOT_FOUND)
     async def not_found(_: Request, __: Exception) -> JSONResponse:
@@ -50,6 +52,15 @@ def create_app() -> FastAPI:
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             content={"error": {"code": "validation_error", "message": "Invalid request"}},
         )
+
+    @application.exception_handler(HTTPException)
+    async def http_error(_: Request, exception: HTTPException) -> JSONResponse:
+        detail = exception.detail
+        if isinstance(detail, dict) and "code" in detail and "message" in detail:
+            error = detail
+        else:
+            error = {"code": "request_failed", "message": str(detail)}
+        return JSONResponse(status_code=exception.status_code, content={"error": error})
 
     return application
 

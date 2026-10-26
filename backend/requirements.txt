@@ -1,5 +1,10 @@
 fastapi==0.115.6
 httpx==0.28.1
+SQLAlchemy==2.0.37
+alembic==1.14.1
+pwdlib==0.2.1
+argon2-cffi==23.1.0
+argon2-cffi-bindings==25.1.0
 pydantic==2.12.5
 pydantic-settings==2.7.1
 pytest==8.3.4
