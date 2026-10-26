@@ -15,3 +15,4 @@ weights, and secrets out of this file and out of Wispr Flow.
 | 2026-10-27 | S1 implementation | Approved backend and frontend implementation prompt | Write failing tests first; add only local single-admin auth, CSRF, migrations, sessions, and the protected shell |
 | 2026-10-27 | S1 review | Security and scope review notes | Confirm Argon2id, hashed sessions, generic errors, CSRF on mutations, restrictive CORS, no runtime voice features, and no sensitive logging |
 | 2026-10-27 | Commit | `feat(auth): add Alembic auth persistence and session security`; `feat(shell): add protected Ceravox React app shell`; `docs: close out S1 auth and app-shell milestone` | Keep S1 split into backend, frontend, and documentation increments |
+| 2026-10-27 | Review fix | `fix(security): satisfy secret scanning for auth fixtures` | Allowlist only deliberately synthetic auth-test values and preserve password-hash log redaction |
