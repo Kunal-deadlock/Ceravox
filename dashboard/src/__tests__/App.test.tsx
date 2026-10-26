@@ -1,19 +1,21 @@
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import App from "../App";
 
 vi.mock("../lib/api", () => ({
-  getHealth: vi.fn().mockResolvedValue({ status: "ready", dependencies: {} }),
+  ApiError: class ApiError extends Error {
+    status = 401;
+  },
+  getAuthStatus: vi.fn().mockResolvedValue({ setup_required: false }),
+  getCsrfToken: vi.fn().mockResolvedValue("csrf-token"),
+  getMe: vi.fn().mockRejectedValue({ status: 401 }),
 }));
 
 describe("App", () => {
-  beforeEach(() => vi.clearAllMocks());
-
-  it("renders the Ceravox heading", async () => {
+  it("renders the login heading", async () => {
     render(<App />);
 
-    expect(screen.getByRole("heading", { name: "Ceravox" })).toBeTruthy();
-    expect(await screen.findByText("Ready to listen")).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "Log in to Ceravox" })).toBeTruthy();
   });
 });
