@@ -6,6 +6,20 @@ work: transcripts, meeting notes, action items, and spoken answers.
 S0 provides the reproducible foundation: a FastAPI backend, React dashboard,
 Docker Compose services, health checks, CI, and secret-safety guardrails.
 
+## Cost and development workflow
+
+Ceravox is free to build and run. It does not use paid AI APIs, hosting,
+databases, model services, or dependencies that require a credit card. Runtime
+inference uses local models and services: faster-whisper, Kokoro, Silero VAD,
+and Ollama. Persistence uses SQLite, CI uses the GitHub Actions free tier, and
+Ceravox remains offline-capable after local models are installed.
+
+Wispr Flow Pro is used as the primary development interface for specifications,
+user stories, architecture decisions, coding prompts, reviews, documentation,
+bug reports, commit messages, demo scripts, and submission copy. Wispr Flow Pro
+is not a Ceravox runtime dependency. Never enter passwords, session tokens,
+private audio, transcripts, model weights, or secrets into Wispr Flow.
+
 ## Requirements
 
 - Python 3.11+
@@ -21,6 +35,7 @@ cd backend
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
+alembic upgrade head
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
@@ -60,6 +75,7 @@ docker compose down
 
 ```powershell
 cd backend
+alembic upgrade head
 python -m pytest
 python -m ruff check .
 python -m mypy app

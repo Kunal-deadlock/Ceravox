@@ -5,6 +5,23 @@ meeting notes, action items, and spoken answers. Core audio, transcript,
 reasoning, and speech workflows remain local after the required models are
 installed.
 
+## Cost and workflow policy
+
+Ceravox must remain free to build and run. The project does not use paid AI
+APIs, paid hosting, paid databases, paid model services, or dependencies that
+require a credit card. The approved runtime stack uses local/open-weight
+faster-whisper, Kokoro, Silero VAD, and Ollama models/services, with SQLite for
+persistence and the GitHub Actions free tier for CI.
+
+Wispr Flow Pro is the primary development interface for specifications, user
+stories, architecture decisions, coding prompts, code review notes,
+documentation, bug reports, debugging context, commit messages, demo-video
+scripts, and submission copy. It is development-only, not a Ceravox runtime
+dependency. Meaningful usage is recorded in `docs/wispr_usage_log.md`.
+Passwords, session tokens, private audio, transcripts, model weights, and
+secrets must never be entered into Wispr Flow or committed to the repository.
+Ceravox must remain offline-capable after local models are installed.
+
 ## Fixed stack
 
 - React, TypeScript, and Vite dashboard

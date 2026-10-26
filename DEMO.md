@@ -16,7 +16,8 @@ docker compose down
 ```
 
 Open <http://127.0.0.1:5173> and confirm that the dashboard reports the
-backend as healthy.
+backend as healthy. On the first visit, create the one-time local admin,
+log in, inspect the protected navigation placeholders, and log out.
 
 The transcription, speech, live assistant, and meeting intelligence flows are
 planned for the later S2–S4 milestones.
