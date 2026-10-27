@@ -6,15 +6,16 @@ import subprocess
 import urllib.request
 from pathlib import Path
 
-ASR_REVISION = "ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66"
-TTS_REVISION = "f3ff3571791e39611d31c381e3a41a3af07b4987"
+ASR_REVISION = "ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66"  # pragma: allowlist secret
+TTS_REVISION = "f3ff3571791e39611d31c381e3a41a3af07b4987"  # pragma: allowlist secret
 FILES = [
     (
         "Systran/faster-whisper-base",
         ASR_REVISION,
         "model.bin",
         "faster-whisper-base/model.bin",
-        "d01c3014881c9c6f3133c182f3d2887eb6ca1c789a7538c5c007196857a0a6a9",
+        "d01c3014881c9c6f3133c182f3d2887e"  # pragma: allowlist secret
+        "b6ca1c789a7538c5c007196857a0a6a9",  # pragma: allowlist secret
     ),
     (
         "Systran/faster-whisper-base",
@@ -42,7 +43,8 @@ FILES = [
         TTS_REVISION,
         "kokoro-v1_0.pth",
         "kokoro/kokoro-v1_0.pth",
-        "496dba118d1a58f5f3db2efc88dbdc216e0483fc89fe6e47ee1f2c53f18ad1e4",
+        "496dba118d1a58f5f3db2efc88dbdc21"  # pragma: allowlist secret
+        "6e0483fc89fe6e47ee1f2c53f18ad1e4",  # pragma: allowlist secret
     ),
     ("hexgrad/Kokoro-82M", TTS_REVISION, "config.json", "kokoro/config.json", None),
     (
@@ -50,7 +52,8 @@ FILES = [
         TTS_REVISION,
         "voices/af_heart.pt",
         "kokoro/voices/af_heart.pt",
-        "0ab5709b8ffab19bfd849cd11d98f75b60af7733253ad0d67b12382a102cb4ff",
+        "0ab5709b8ffab19bfd849cd11d98f75b"  # pragma: allowlist secret
+        "60af7733253ad0d67b12382a102cb4ff",  # pragma: allowlist secret
     ),
 ]
 

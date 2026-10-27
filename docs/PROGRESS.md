@@ -957,6 +957,28 @@ are retained here. The manual browser playback item remains open as a usability
 follow-up; automated page/API coverage and direct WAV generation were verified.
 Missing models or incompatible dependencies were not substituted with mocks.
 
+### S2 actual model verification
+
+- `backend/.venv/Scripts/python scripts/install_models.py --download` — passed;
+  installed the approved model files only. Assets remain under ignored
+  `backend/models/` and are not tracked.
+- `backend/.venv/Scripts/python scripts/check_offline.py` — passed; Kokoro
+  `af_heart` generated a 128,444-byte WAV and faster-whisper base CPU/int8
+  returned one English segment.
+- `backend/.venv/Scripts/python scripts/check_offline.py --offline` — passed;
+  the same local generation/transcription completed with the audit network deny.
+- `backend/.venv/Scripts/python -m pytest -q tests/test_voice_local.py
+  --run-local-voice` — `1 passed`; authenticated API round-trip generated WAV,
+  transcribed it, persisted/retrieved the transcript, and cleaned temporary
+  audio with network access denied.
+- Model revisions: faster-whisper base
+  `ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66`; Kokoro-82M
+  `f3ff3571791e39611d31c381e3a41a3af07b4987`. Sources and licenses are recorded
+  in `README.md`; no machine-specific paths are documented.
+- `docker info` — Docker client available, server unavailable at
+  `npipe:////./pipe/dockerDesktopLinuxEngine`; Compose runtime smoke is **NOT
+  RUN / ENVIRONMENT CAVEAT**. `docker compose config -q` independently passed.
+
 ### Approval checkpoint
 
 Implementation approved by the user. Model/dependency installation was separately
