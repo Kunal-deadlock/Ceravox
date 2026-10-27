@@ -9,9 +9,15 @@ from sqlalchemy.orm import Session
 from app.core.security import hash_token
 from app.db.models import SessionRecord, User
 from app.db.session import get_db
+from app.services.models import ModelService
 
 SESSION_COOKIE = "ceravox_session"
 UNAUTHORIZED = {"code": "unauthorized", "message": "Authentication required"}
+
+
+def get_voice_runtime(request: Request) -> ModelService:
+    runtime: ModelService = request.app.state.voice_runtime
+    return runtime
 
 
 def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:

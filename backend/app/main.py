@@ -1,25 +1,33 @@
 """FastAPI application entry point."""
 
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, Request, status
+from fastapi import FastAPI, HTTPException, Request, Response, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.api.audio import router as audio_router
 from app.api.auth import router as auth_router
 from app.api.health import router as health_router
+from app.api.models import router as models_router
+from app.api.speech import router as speech_router
+from app.api.transcripts import router as transcripts_router
 from app.core.config import get_settings
 from app.core.logging import configure_logging
+from app.services.audio_storage import clean_abandoned
+from app.services.models import ModelService
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+async def lifespan(application: FastAPI) -> AsyncIterator[None]:
     """Configure process infrastructure during application startup."""
 
     settings = get_settings()
     configure_logging(settings.log_level)
+    clean_abandoned(settings.audio_storage_dir)
+    application.state.voice_runtime = ModelService(settings)
     yield
 
 
@@ -38,6 +46,19 @@ def create_app() -> FastAPI:
     )
     application.include_router(health_router)
     application.include_router(auth_router)
+    application.include_router(audio_router)
+    application.include_router(speech_router)
+    application.include_router(transcripts_router)
+    application.include_router(models_router)
+
+    @application.middleware("http")
+    async def private_cache(
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        response = await call_next(request)
+        if request.url.path.startswith(("/v1/audio", "/v1/transcripts", "/v1/models")):
+            response.headers["Cache-Control"] = "no-store"
+        return response
 
     @application.exception_handler(status.HTTP_404_NOT_FOUND)
     async def not_found(_: Request, __: Exception) -> JSONResponse:

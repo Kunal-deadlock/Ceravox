@@ -8,12 +8,12 @@ from collections.abc import Mapping
 from typing import Any
 
 _SENSITIVE_KEY = re.compile(
-    r"(password|passwd|secret|token|authorization|cookie|api[_-]?key|audio|transcript|speech)",
+    r"(password|passwd|secret|token|authorization|cookie|api[_-]?key|audio|transcript|speech|text|filename|path)",
     re.IGNORECASE,
 )
 _SENSITIVE_NAMES = (
     r"password(?:_hash)?|passwd|secret|token|authorization|cookie|"
-    r"api[_-]?key|audio|transcript|speech"
+    r"api[_-]?key|audio|transcript|speech|text|filename|path"
 )
 _SENSITIVE_ASSIGNMENT = re.compile(
     rf"(?i)({_SENSITIVE_NAMES})\s*[:=]\s*.*?"
@@ -46,7 +46,7 @@ class JsonFormatter(logging.Formatter):
             "message": redact(record.getMessage()),
         }
         if record.exc_info:
-            payload["exception"] = self.formatException(record.exc_info)
+            payload["exception"] = "[REDACTED]"
         return json.dumps(payload, ensure_ascii=True)
 
 
@@ -59,3 +59,7 @@ def configure_logging(level: str = "INFO") -> None:
     root.handlers.clear()
     root.addHandler(handler)
     root.setLevel(level.upper())
+    for name in ("faster_whisper", "kokoro", "misaki", "httpx", "httpcore", "sqlalchemy.engine"):
+        logger = logging.getLogger(name)
+        logger.handlers = [logging.NullHandler()]
+        logger.propagate = False
