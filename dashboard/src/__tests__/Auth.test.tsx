@@ -11,6 +11,7 @@ const api = vi.hoisted(() => ({
   login: vi.fn(),
   logout: vi.fn(),
   setupAdmin: vi.fn(),
+  getModels: vi.fn(),
 }));
 
 vi.mock("../lib/api", () => api);
@@ -24,6 +25,7 @@ describe("S1 authentication shell", () => {
     api.login.mockResolvedValue({ email: "admin@example.test", is_admin: true });
     api.logout.mockResolvedValue(undefined);
     api.setupAdmin.mockResolvedValue(undefined);
+    api.getModels.mockResolvedValue({ faster_whisper: { model: "base", available: true, status: "available" }, kokoro: { model: "Kokoro-82M", available: true, status: "available", voices: ["af_heart"], default_voice: "af_heart" }, ollama: { available: false, status: "not_configured" }, limits: { upload_bytes: 26214400, text_chars: 2000, duration_seconds: 600 } });
     vi.clearAllMocks();
   });
 

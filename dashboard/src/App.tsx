@@ -7,14 +7,17 @@ import { Dashboard } from "./pages/Dashboard";
 import { Login } from "./pages/Login";
 import { Placeholder } from "./pages/Placeholder";
 import { Setup } from "./pages/Setup";
+import { Transcribe } from "./pages/Transcribe";
+import { Speak } from "./pages/Speak";
+import { ModelStatus } from "./components/ModelStatus";
 
 function AuthenticatedRoutes({ user, onLogout }: { user: UserProfile; onLogout: () => void }) {
   return (
     <Routes>
       <Route element={<Dashboard user={user} onLogout={onLogout} />}>
-        <Route index element={<section className="status-card"><div><p className="card-label">Private by default</p><h2>Ready for local voice workflows</h2><p className="muted">Your authenticated shell is ready. Voice workflows will arrive in later milestones.</p></div><span className="status-pill status-ready">local</span></section>} />
-        <Route path="transcribe" element={<Placeholder title="Transcribe" />} />
-        <Route path="speak" element={<Placeholder title="Speak" />} />
+        <Route index element={<><ModelStatus /><section className="status-card"><div><p className="card-label">Private by default</p><h2>Ready for local voice workflows</h2><p className="muted">Transcription and speech stay on this machine after model installation.</p></div><span className="status-pill status-ready">local</span></section></>} />
+        <Route path="transcribe" element={<Transcribe />} />
+        <Route path="speak" element={<Speak />} />
         <Route path="live-assistant" element={<Placeholder title="Live Assistant" />} />
         <Route path="meeting-notes" element={<Placeholder title="Meeting Notes" />} />
       </Route>
