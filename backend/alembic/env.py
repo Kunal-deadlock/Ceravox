@@ -1,5 +1,6 @@
 """Alembic migration environment."""
 
+import os
 import sys
 from logging.config import fileConfig
 from pathlib import Path
@@ -13,6 +14,11 @@ from app.db import models  # noqa: F401 - register model metadata
 from app.db.base import Base
 
 config = context.config
+# An explicit programmatic URL (isolated tests) takes precedence over the CLI env.
+if config.get_main_option("sqlalchemy.url") == "sqlite:///./ceravox.db":
+    url = os.environ.get("CERAVOX_DATABASE_URL")
+    if url:
+        config.set_main_option("sqlalchemy.url", url.replace("%", "%%"))
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
