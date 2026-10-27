@@ -1,0 +1,1 @@
+"""Explicitly local inference adapters."""

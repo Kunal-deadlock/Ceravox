@@ -25,3 +25,8 @@ python_version = "3.12"
 strict = true
 plugins = []
 follow_imports = "silent"
+
+[[tool.mypy.overrides]]
+module = ["torch.*", "kokoro.*", "misaki.*", "spacy.*", "faster_whisper.*", "av.*", "loguru.*"]
+follow_imports = "skip"
+ignore_missing_imports = true
