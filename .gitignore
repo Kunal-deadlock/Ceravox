@@ -5,6 +5,12 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 .venv/
+.venv-bootstrap/
+.cache/
+*.db-wal
+*.db-shm
+*.sqlite-wal
+*.sqlite-shm
 venv/
 
 # Node

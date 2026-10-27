@@ -21,7 +21,7 @@
 - After local models are installed, advertised Ceravox workflows must work
   offline. Do not expose services publicly to work around local limitations.
 
-## S1 commands
+## S2 commands
 
 Run backend commands from `backend/`:
 
@@ -32,6 +32,8 @@ python -m pytest -q
 python -m ruff check .
 python -m ruff format --check .
 python -m mypy app
+python -m pip check
+python scripts/check_offline.py --offline  # after explicit local model install
 ```
 
 Run dashboard commands from `dashboard/`:
@@ -48,7 +50,7 @@ Validate the local stack from the repository root with
 `docker compose config -q`. Services must remain bound to `127.0.0.1` on the
 host.
 
-## S1 conventions
+## S2 conventions
 
 - Use Alembic for schema changes; never use `create_all()` as an upgrade path.
 - Keep routes thin: authenticate, validate, call a service, and return a safe
@@ -57,7 +59,17 @@ host.
 - Protect every cookie-authenticated mutation with the CSRF double-submit
   check.
 - Never log passwords, password hashes, cookies, session tokens, CSRF values,
-  or private user content.
-- Keep authentication single-admin and local. Do not add ASR, TTS, VAD,
-  Ollama, WebSocket, meeting-intelligence, cloud, or publicly exposed service
-  behavior in S1.
+  audio, transcript text, generated speech, filenames, paths, or private user
+  content.
+- Require authentication on every voice/model/transcript route and CSRF on every
+  voice mutation. Keep transcripts owner-scoped and return indistinguishable
+  404s for missing/other-user details.
+- Store only UUID provenance for temporary uploads; never use user filenames as
+  paths. Delete source/normalized audio in all request paths and never persist
+  generated speech.
+- Load faster-whisper and Kokoro only from configured local assets. No model,
+  voice, tokenizer, phonemizer, cloud, or Ollama download/fallback at runtime.
+- Keep audio decoding, inference, request bytes, text, duration, and output
+  bounded; use Alembic for schema changes and never `create_all()` for upgrades.
+- S2 excludes WebSockets, VAD, live assistant, meeting intelligence, cloud APIs,
+  public exposure, and new host ports. S3 requires an approved S2 report.

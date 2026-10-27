@@ -1,0 +1,16 @@
+.venv/
+.venv-bootstrap/
+.cache/
+models/
+recordings/
+generated_audio/
+backups/
+transcripts/
+*.db
+*.sqlite*
+.env
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+tests/

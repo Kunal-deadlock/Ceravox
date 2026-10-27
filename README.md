@@ -1,7 +1,9 @@
 # Ceravox
 
 Ceravox is a local-first voice AI workstation for turning speech into useful
-work: transcripts, meeting notes, action items, and spoken answers.
+work: transcripts, meeting notes, action items, and spoken answers. S2 adds
+authenticated local transcription, speech generation, persisted transcripts,
+and safe model status reporting.
 
 S0 provides the reproducible foundation: a FastAPI backend, React dashboard,
 Docker Compose services, health checks, CI, and secret-safety guardrails.
@@ -25,6 +27,46 @@ private audio, transcripts, model weights, or secrets into Wispr Flow.
 - Python 3.11+
 - Node.js 20+
 - Docker Desktop (optional, for Compose)
+
+## S2 local models
+
+Install models explicitly; Ceravox never downloads models at startup or during
+requests. The supported S2 defaults are:
+
+- faster-whisper base from `Systran/faster-whisper-base`, revision
+  `ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66`, MIT license; CPU/int8.
+- Kokoro-82M from `hexgrad/Kokoro-82M`, revision
+  `f3ff3571791e39611d31c381e3a41a3af07b4987`, Apache-2.0 license; English
+  `af_heart` voice and local `en_core_web_sm` English resources.
+
+The model files are approximately 476 MB. Dependency downloads and temporary
+installation space are larger. Run the explicit installer from `backend/` only
+after reviewing the upstream licenses and pinned requirements:
+
+```powershell
+cd backend
+..\.venv-bootstrap\Scripts\uv pip install --python .venv\Scripts\python.exe -r requirements.txt
+..\.venv-bootstrap\Scripts\uv pip install --python .venv\Scripts\python.exe https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+.\.venv\Scripts\python scripts\install_models.py --download
+```
+
+Model directories are `backend/models/faster-whisper-base` and
+`backend/models/kokoro`; they are ignored by Git. Configure locations, voices,
+storage, and limits with the `CERAVOX_*` variables in `backend/.env.example`.
+Do not put machine-specific absolute paths in committed documentation.
+
+After installation, verify local-only operation:
+
+```powershell
+.\.venv\Scripts\python scripts\check_offline.py
+.\.venv\Scripts\python scripts\check_offline.py --offline
+```
+
+S2 accepts WAV, MP3, M4A, and OGG uploads, normalizes them to 16 kHz mono PCM,
+deletes temporary audio after processing, and persists only owner-scoped
+transcript text/segments. Speech returns an in-memory WAV and does not persist
+generated audio. The dashboard provides Transcribe, Speak, export, playback,
+download, and model-status views.
 
 ## Run locally
 
