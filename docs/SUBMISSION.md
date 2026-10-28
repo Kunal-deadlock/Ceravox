@@ -1,4 +1,4 @@
-﻿# Ceravox — Hackathon Submission Index
+# Ceravox — Hackathon Submission Index
 
 **No Hands: The Wispr Challenge**
 
@@ -11,7 +11,7 @@ dependency after the initial model install.
 
 ## 1. Working project / repository link
 
-PENDING — provide the GitHub repository URL when publishing.
+https://github.com/Kunal-deadlock/Ceravox
 
 Judges: see DEMO.md for exact setup and launch commands.
 
@@ -77,9 +77,9 @@ Wispr Flow is a development tool only and is not part of Ceravox's runtime.
 
 ## Final submission checklist
 
-- [ ] Repository link supplied and public
+- [x] Repository link supplied and public
 - [ ] Demo video recorded and linked (2 minutes max)
 - [ ] Wispr usage-card screenshot attached
 - [ ] Submission form completed
-- [ ] No secrets, databases, recordings, or model weights committed
-- [ ] DEMO.md setup instructions tested end-to-end
+- [x] No secrets, databases, recordings, or model weights committed
+- [x] DEMO.md setup instructions tested end-to-end
