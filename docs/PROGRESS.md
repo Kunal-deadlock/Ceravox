@@ -1,5 +1,174 @@
 # Ceravox Progress
 
+## M1 — Demo Resilience and UX Polish
+
+**Status:** PLANNING — awaiting approval before implementation
+
+**Deadline:** 31 October 2026, 11:59 PM IST
+
+### M1 plan summary
+
+Goal: make Ceravox easier for judges to run, harder to break during a demo, and
+clearer when a local dependency is unavailable.
+
+Six tasks, implemented in this order:
+
+1. **System status endpoint** `GET /api/system/status` — authenticated; reports
+   db, ASR, TTS, and Ollama readiness as "ready/unavailable/degraded" with a
+   short safe reason. Overall status is "ready" only when all required
+   components are ready. Builds on existing `ModelService.status()` and a
+   lightweight Ollama `/api/tags` ping (no inference).
+2. **Preflight status UI** — `SystemStatus.tsx` page accessible from the
+   dashboard nav; shows each component with a clear indicator, short reason when
+   unavailable, a Refresh button, and overall readiness. Handles backend-
+   unreachable gracefully.
+3. **Meeting Notes loading/error states** — improve `MeetingNotes.tsx`: typed
+   loading state per action, inline error message, buttons disabled during any
+   in-flight request, and duplicate-request guard.
+4. **Transcript export** — add `GET /v1/transcripts/{id}/export?format=md|txt|json`
+   (owner-scoped, server-validated format); add download buttons to `Transcribe.tsx`.
+5. **Sample meeting asset** — `backend/samples/generate_sample.py` generates a
+   short synthetic WAV using only Python stdlib (`wave`, `math`, `struct`);
+   output is safe to use for demos. Instructions added to `DEMO.md`.
+6. **One-command dev startup** — `scripts/dev.ps1` starts Ollama, backend,
+   and dashboard and prints local URLs. `README.md` and `DEMO.md` updated.
+
+### M1 auth convention
+
+All new endpoints follow the existing convention: session cookie required
+(returns 401 unauthenticated). No endpoint exposes filesystem paths, exception
+messages, tokens, or secrets.
+
+### M1 task list with tests
+
+#### Task 1 — System status endpoint
+
+**Status:** COMPLETE (74 backend tests passed, 2 skipped, ruff/format/mypy passed)
+
+**Tests to write first (`backend/tests/test_system_status.py`)**
+
+- [x] Authenticated GET returns 200 with expected shape (db, asr, tts, ollama, overall)
+- [x] Unauthenticated GET returns 401
+- [x] Each component status is "ready", "unavailable", or "degraded"
+- [x] DB unavailable produces a safe degraded/unavailable response
+- [x] Ollama unavailable produces a safe "unavailable" status (no error detail leaked)
+- [x] Response contains no filesystem paths, secrets, stack traces, or tokens
+- [x] Overall is "ready" only if all components are ready
+
+**Implementation files**
+
+- `backend/app/api/system.py` (new)
+- `backend/app/main.py` (include system router)
+
+#### Task 2 — Preflight status UI
+
+**Tests to write first (`dashboard/src/__tests__/SystemStatus.test.tsx`)**
+
+- [ ] Renders all four component status rows (db, asr, tts, ollama)
+- [ ] Shows "unavailable" state and reason safely (no paths or stack traces)
+- [ ] Refresh button triggers a new status fetch
+- [ ] Handles backend failure (network error) without crashing
+
+**Implementation files**
+
+- `dashboard/src/pages/SystemStatus.tsx` (new)
+- `dashboard/src/lib/api.ts` (add `getSystemStatus()`)
+- `dashboard/src/App.tsx` (add /status route and nav link)
+- `dashboard/src/styles.css` (status indicator styles)
+
+#### Task 3 — Meeting Notes loading/error states
+
+**Tests to write first (`dashboard/src/__tests__/MeetingNotes.test.tsx`)**
+
+- [ ] Shows loading state while summary is generating
+- [ ] Shows loading state while Q&A answer is generating
+- [ ] Shows error message if Ollama request fails
+- [ ] Buttons are disabled while any request is in progress
+- [ ] Duplicate submit is prevented
+- [ ] Recovers cleanly after a retry
+- [ ] "Speak answer" button still works after successful Q&A
+
+**Implementation files**
+
+- `dashboard/src/pages/MeetingNotes.tsx` (improve existing)
+
+#### Task 4 — Transcript export
+
+**Tests to write first (`backend/tests/test_transcripts.py` additions)**
+
+- [ ] Authenticated owner can download `.md` format
+- [ ] Authenticated owner can download `.txt` format
+- [ ] Authenticated owner can download `.json` format
+- [ ] Unauthenticated request returns 401
+- [ ] Non-owner request returns indistinguishable 404 (not 403)
+- [ ] Invalid transcript ID handled safely
+- [ ] Invalid format parameter rejected safely
+- [ ] Exported MD, TXT, and JSON contain expected transcript content
+
+**Frontend tests (`dashboard/src/__tests__/Transcribe.test.tsx` additions)**
+
+- [ ] Download MD button triggers correct API call
+- [ ] Download TXT button triggers correct API call
+- [ ] Download JSON button triggers correct API call
+
+**Implementation files**
+
+- `backend/app/api/transcripts.py` (add export endpoint)
+- `dashboard/src/lib/api.ts` (add `downloadTranscript()`)
+- `dashboard/src/pages/Transcribe.tsx` (add export buttons)
+
+#### Task 5 — Sample meeting asset
+
+- [ ] `backend/samples/generate_sample.py` generates a valid WAV using stdlib only
+- [ ] Running the script produces a WAV that the backend can transcribe
+- [ ] `DEMO.md` documents how to generate and use the sample
+
+**Implementation files**
+
+- `backend/samples/generate_sample.py` (new)
+- `DEMO.md` (add sample instructions)
+
+#### Task 6 — One-command dev startup
+
+- [ ] `scripts/dev.ps1` starts Ollama (if needed), backend, and dashboard
+- [ ] Script prints clear URLs and explains what to do if a model is missing
+- [ ] `README.md` updated with the exact startup command
+- [ ] `DEMO.md` updated with the exact startup command
+
+**Implementation files**
+
+- `scripts/dev.ps1` (new)
+- `README.md` (update startup section)
+- `DEMO.md` (update startup section)
+
+### M1 definition of done
+
+- [ ] `GET /api/system/status` works and is tested
+- [ ] Dashboard shows clear system readiness (SystemStatus page)
+- [ ] MeetingNotes has robust loading/error states with tested behavior
+- [ ] Transcript export works securely for all three formats
+- [ ] Sample meeting asset is documented and usable
+- [ ] One-command startup script exists and is documented
+- [ ] All backend and frontend checks pass with real output
+- [ ] No secrets, database files, recordings, or model weights are committed
+- [ ] `docs/PROGRESS.md` and `docs/wispr_usage_log.md` updated
+
+### M1 verification (to be filled after implementation)
+
+| Check | Result |
+| --- | --- |
+| Backend pytest | pending |
+| Ruff check | pending |
+| Ruff format --check | pending |
+| mypy app | pending |
+| Frontend typecheck | pending |
+| Frontend lint | pending |
+| Frontend tests | pending |
+| Frontend build | pending |
+| docker compose config -q | pending |
+
+
+
 ## Lean hackathon delivery priority (2026-10-28)
 
 Priority: A) finish S2 manual acceptance; B) minimum S4 meeting intelligence;

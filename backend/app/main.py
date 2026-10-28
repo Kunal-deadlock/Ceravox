@@ -14,6 +14,7 @@ from app.api.health import router as health_router
 from app.api.meetings import router as meetings_router
 from app.api.models import router as models_router
 from app.api.speech import router as speech_router
+from app.api.system import router as system_router
 from app.api.transcripts import router as transcripts_router
 from app.core.config import get_settings
 from app.core.logging import configure_logging
@@ -52,13 +53,16 @@ def create_app() -> FastAPI:
     application.include_router(transcripts_router)
     application.include_router(meetings_router)
     application.include_router(models_router)
+    application.include_router(system_router)
 
     @application.middleware("http")
     async def private_cache(
         request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
         response = await call_next(request)
-        if request.url.path.startswith(("/v1/audio", "/v1/transcripts", "/v1/models")):
+        if request.url.path.startswith(
+            ("/v1/audio", "/v1/transcripts", "/v1/models", "/api/system")
+        ):
             response.headers["Cache-Control"] = "no-store"
         return response
 
