@@ -15,7 +15,9 @@ it("sends credentialed multipart without overriding its boundary", async () => {
 });
 it("consumes binary speech and handles JSON errors", async () => {
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("WAV", { headers: { "Content-Type": "audio/wav" } })));
-  expect(await generateSpeech("Hello", "af_heart")).toBeInstanceOf(Blob);
+  const speech = await generateSpeech("Hello", "af_heart");
+  expect(speech.type).toBe("audio/wav");
+  expect(await speech.text()).toBe("WAV");
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ error: { message: "Unavailable" } }), { status: 503 })));
   await expect(generateSpeech("Hello", "af_heart")).rejects.toThrow("Unavailable");
 });
