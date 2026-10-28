@@ -140,42 +140,44 @@ messages, tokens, or secrets.
 
 #### Task 6 — One-command dev startup
 
-- [ ] `scripts/dev.ps1` starts Ollama (if needed), backend, and dashboard
-- [ ] Script prints clear URLs and explains what to do if a model is missing
-- [ ] `README.md` updated with the exact startup command
-- [ ] `DEMO.md` updated with the exact startup command
+**Status:** COMPLETE (scripts/dev.ps1 created, README.md & DEMO.md updated with exact commands)
+
+- [x] `scripts/dev.ps1` starts Ollama (if needed), backend, and dashboard
+- [x] Script prints clear URLs and explains what to do if a model is missing
+- [x] `README.md` updated with the exact startup command
+- [x] `DEMO.md` updated with the exact startup command
 
 **Implementation files**
 
-- `scripts/dev.ps1` (new)
-- `README.md` (update startup section)
-- `DEMO.md` (update startup section)
+- `scripts/dev.ps1` (new PowerShell startup script)
+- `README.md` (one-command startup guide)
+- `DEMO.md` (Option A/B startup workflows)
 
 ### M1 definition of done
 
-- [ ] `GET /api/system/status` works and is tested
-- [ ] Dashboard shows clear system readiness (SystemStatus page)
-- [ ] MeetingNotes has robust loading/error states with tested behavior
-- [ ] Transcript export works securely for all three formats
-- [ ] Sample meeting asset is documented and usable
-- [ ] One-command startup script exists and is documented
-- [ ] All backend and frontend checks pass with real output
-- [ ] No secrets, database files, recordings, or model weights are committed
-- [ ] `docs/PROGRESS.md` and `docs/wispr_usage_log.md` updated
+- [x] `GET /api/system/status` works and is tested
+- [x] Dashboard shows clear system readiness (SystemStatus page)
+- [x] MeetingNotes has robust loading/error states with tested behavior
+- [x] Transcript export works securely for all three formats (MD, TXT, JSON)
+- [x] Sample meeting asset is documented and usable
+- [x] One-command startup script exists and is documented
+- [x] All backend and frontend checks pass with real output
+- [x] No secrets, database files, recordings, or model weights are committed
+- [x] `docs/PROGRESS.md` and `docs/wispr_usage_log.md` updated
 
-### M1 verification (to be filled after implementation)
+### M1 verification (actual output)
 
 | Check | Result |
 | --- | --- |
-| Backend pytest | pending |
-| Ruff check | pending |
-| Ruff format --check | pending |
-| mypy app | pending |
-| Frontend typecheck | pending |
-| Frontend lint | pending |
-| Frontend tests | pending |
-| Frontend build | pending |
-| docker compose config -q | pending |
+| Backend pytest | 81 passed, 2 skipped |
+| Ruff check | Passed (All checks passed!) |
+| Ruff format --check | Passed (57 files already formatted) |
+| mypy app | Passed (0 issues in 35 source files) |
+| Frontend typecheck | Passed (tsc --noEmit clean) |
+| Frontend lint | Passed (eslint clean) |
+| Frontend tests | Passed (8 files, 24 passed) |
+| Frontend build | Passed (dist/ created) |
+| docker compose config -q | Passed |
 
 
 

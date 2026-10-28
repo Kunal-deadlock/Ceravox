@@ -1,12 +1,10 @@
 # Ceravox
 
 Ceravox is a local-first voice AI workstation for turning speech into useful
-work: transcripts, meeting notes, action items, and spoken answers. S2 adds
-authenticated local transcription, speech generation, persisted transcripts,
-and safe model status reporting.
-
-S0 provides the reproducible foundation: a FastAPI backend, React dashboard,
-Docker Compose services, health checks, CI, and secret-safety guardrails.
+work: transcripts, meeting notes, action items, and spoken answers. M1 adds
+demo resilience, a preflight system status dashboard, robust meeting notes
+loading/error states, multi-format transcript export (MD, TXT, JSON), sample
+meeting asset generation, and one-command development startup.
 
 ## Cost and development workflow
 
@@ -66,11 +64,25 @@ S2 accepts WAV, MP3, M4A, and OGG uploads, normalizes them to 16 kHz mono PCM,
 deletes temporary audio after processing, and persists only owner-scoped
 transcript text/segments. Speech returns an in-memory WAV and does not persist
 generated audio. The dashboard provides Transcribe, Speak, export, playback,
-download, and model-status views.
+download, and system status views.
 
 ## Run locally
 
-### Backend
+### One-command startup (Windows PowerShell)
+
+From repository root:
+
+```powershell
+.\scripts\dev.ps1
+```
+
+This checks prerequisites, starts Ollama (if installed), runs the backend on
+`127.0.0.1:8000`, starts the Vite dashboard on `127.0.0.1:5173`, and displays
+troubleshooting guidance if any local models are missing.
+
+### Manual native startup
+
+#### Backend
 
 ```powershell
 cd backend
@@ -84,7 +96,7 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 The backend is available at <http://127.0.0.1:8000>. OpenAPI docs are at
 <http://127.0.0.1:8000/docs>.
 
-### Dashboard
+#### Dashboard
 
 ```powershell
 cd dashboard
@@ -120,6 +132,7 @@ cd backend
 alembic upgrade head
 python -m pytest
 python -m ruff check .
+python -m ruff format --check .
 python -m mypy app
 
 cd ..\dashboard

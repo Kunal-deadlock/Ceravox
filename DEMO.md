@@ -35,7 +35,19 @@ ollama pull qwen2.5:3b
 
 ---
 
-## Start services (native, without Docker)
+## Start services (one command or manual)
+
+### Option A: One-command startup (PowerShell)
+
+From repository root:
+
+```powershell
+.\scripts\dev.ps1
+```
+
+This starts Ollama, backend, and dashboard, and displays local URLs.
+
+### Option B: Manual native startup
 
 ```powershell
 # Terminal 1 — backend
