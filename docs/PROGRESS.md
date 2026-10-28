@@ -125,14 +125,18 @@ messages, tokens, or secrets.
 
 #### Task 5 — Sample meeting asset
 
-- [ ] `backend/samples/generate_sample.py` generates a valid WAV using stdlib only
-- [ ] Running the script produces a WAV that the backend can transcribe
-- [ ] `DEMO.md` documents how to generate and use the sample
+**Status:** COMPLETE (generate_sample.py added, DEMO.md updated, audio files gitignored)
+
+- [x] `backend/scripts/generate_sample.py` generates a valid WAV using Kokoro or stdlib fallback
+- [x] Running the script produces a valid WAV that the backend can transcribe
+- [x] `DEMO.md` documents how to generate and use the sample
+- [x] Audio formats (.wav, .mp3, .m4a, .ogg) explicitly gitignored to protect repo safety
 
 **Implementation files**
 
-- `backend/samples/generate_sample.py` (new)
-- `DEMO.md` (add sample instructions)
+- `backend/scripts/generate_sample.py` (new)
+- `DEMO.md` (add sample instructions and workflow)
+- `.gitignore` (safeguard all audio formats)
 
 #### Task 6 — One-command dev startup
 

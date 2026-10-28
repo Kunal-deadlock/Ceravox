@@ -28,3 +28,4 @@ weights, and secrets out of this file and out of Wispr Flow.
 | 2026-10-28 | M1 Task 2 | Preflight status UI page and integration | 4 new tests in SystemStatus.test.tsx, 18 passed total, typecheck/lint/build clean; System Status page added to nav |
 | 2026-10-28 | M1 Task 3 | Meeting notes loading and error states | 5 new tests in MeetingNotes.test.tsx, 23 passed total; per-action loading indicators, input lockouts during generation, clean retry |
 | 2026-10-28 | M1 Task 4 | Transcript export in Markdown, Plain text, and JSON | 7 new backend tests (81 passed), 1 new frontend test (24 passed), safe attachment downloads for owners only |
+| 2026-10-28 | M1 Task 5 | Sample meeting asset generation and DEMO instructions | Added backend/scripts/generate_sample.py (Kokoro + stdlib fallback), audio gitignore rules, DEMO.md guide |
