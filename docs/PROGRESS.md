@@ -80,19 +80,21 @@ messages, tokens, or secrets.
 
 #### Task 3 — Meeting Notes loading/error states
 
+**Status:** COMPLETE (23 frontend tests passed across suite, 5 MeetingNotes tests, typecheck, lint, build passed)
+
 **Tests to write first (`dashboard/src/__tests__/MeetingNotes.test.tsx`)**
 
-- [ ] Shows loading state while summary is generating
-- [ ] Shows loading state while Q&A answer is generating
-- [ ] Shows error message if Ollama request fails
-- [ ] Buttons are disabled while any request is in progress
-- [ ] Duplicate submit is prevented
-- [ ] Recovers cleanly after a retry
-- [ ] "Speak answer" button still works after successful Q&A
+- [x] Shows loading state while summary is generating
+- [x] Shows loading state while Q&A answer is generating
+- [x] Shows error message if Ollama request fails
+- [x] Buttons are disabled while any request is in progress
+- [x] Duplicate submit is prevented
+- [x] Recovers cleanly after a retry
+- [x] "Speak answer" button still works after successful Q&A
 
 **Implementation files**
 
-- `dashboard/src/pages/MeetingNotes.tsx` (improve existing)
+- `dashboard/src/pages/MeetingNotes.tsx` (improved with distinct action loading states, error boundary, and disabled inputs during requests)
 
 #### Task 4 — Transcript export
 
