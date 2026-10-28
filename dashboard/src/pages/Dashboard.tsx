@@ -24,6 +24,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
         <NavLink to="/speak">Speak</NavLink>
         <NavLink to="/live-assistant">Live Assistant</NavLink>
         <NavLink to="/meeting-notes">Meeting Notes</NavLink>
+        <NavLink to="/system-status">System Status</NavLink>
       </nav>
       <Outlet />
     </main>

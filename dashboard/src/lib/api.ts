@@ -19,6 +19,9 @@ export type TranscriptSegment = { id: string; start_ms: number; end_ms: number; 
 export type Transcript = { id: string; storage_id: string; source_type: string; text: string; language: string | null; duration: number; created_at: string; segments: TranscriptSegment[] };
 export type TranscriptList = { items: Omit<Transcript, "text" | "segments">[]; limit: number; offset: number };
 export type MeetingResult = { transcript_id: string; kind: "summary" | "answer"; text: string };
+export type ComponentStatus = "ready" | "unavailable" | "degraded";
+export type ComponentInfo = { status: ComponentStatus; reason: string };
+export type SystemStatusResponse = { overall: ComponentStatus; components: Record<string, ComponentInfo> };
 
 export class ApiError extends Error {
   constructor(
@@ -102,6 +105,10 @@ export async function getCsrfToken(): Promise<string> {
 
 export function getMe(): Promise<UserProfile> {
   return request<UserProfile>("/v1/auth/me");
+}
+
+export function getSystemStatus(): Promise<SystemStatusResponse> {
+  return request<SystemStatusResponse>("/api/system/status");
 }
 
 export async function getModels(): Promise<ModelResponse> { return request<ModelResponse>("/v1/models"); }

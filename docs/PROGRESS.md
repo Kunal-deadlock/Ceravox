@@ -62,19 +62,21 @@ messages, tokens, or secrets.
 
 #### Task 2 — Preflight status UI
 
+**Status:** COMPLETE (18 frontend tests passed, typecheck, lint, build passed)
+
 **Tests to write first (`dashboard/src/__tests__/SystemStatus.test.tsx`)**
 
-- [ ] Renders all four component status rows (db, asr, tts, ollama)
-- [ ] Shows "unavailable" state and reason safely (no paths or stack traces)
-- [ ] Refresh button triggers a new status fetch
-- [ ] Handles backend failure (network error) without crashing
+- [x] Renders all four component status rows (db, asr, tts, ollama)
+- [x] Shows "unavailable" state and reason safely (no paths or stack traces)
+- [x] Refresh button triggers a new status fetch
+- [x] Handles backend failure (network error) without crashing
 
 **Implementation files**
 
 - `dashboard/src/pages/SystemStatus.tsx` (new)
 - `dashboard/src/lib/api.ts` (add `getSystemStatus()`)
 - `dashboard/src/App.tsx` (add /status route and nav link)
-- `dashboard/src/styles.css` (status indicator styles)
+- `dashboard/src/pages/Dashboard.tsx` (add System Status nav link)
 
 #### Task 3 — Meeting Notes loading/error states
 
