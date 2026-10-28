@@ -1235,3 +1235,38 @@ and explicit report approval.
   with checksum verification, and `backend/scripts/check_offline.py` for a
   subprocess network-denied real-model check. These additional inventory entries
   make the user's explicit installation/offline verification reproducible.
+
+
+---
+
+## 2026-10-29 — Repository Hygiene, Presentation, and Accuracy Alignment
+
+### Scope and goals
+Make the GitHub repository clean, professional, and easy for judges to evaluate for *No Hands: The Wispr Challenge*, without altering application runtime behavior, removing features, or breaking tests.
+
+### Changes made
+1. **Untracked IDE artifacts:**
+   - Untracked `opencode.jsonc` from Git index (`git rm --cached opencode.jsonc`).
+   - Added `opencode.jsonc` to `.gitignore` under IDE configuration files.
+   - Preserved local `opencode.jsonc` file intact on disk.
+2. **Canonical README.md overhaul:**
+   - Added text-based architecture diagram illustrating component data flow (Dashboard -> FastAPI -> SQLite / faster-whisper / Kokoro / Ollama).
+   - Added concise features section categorized by capability (ASR, TTS, Meeting Notes, Transcript Q&A, Multi-format Export, System Status, Sample Generator).
+   - Audited and updated Privacy & Security section with verified claims:
+     - No cloud inference and no external network calls during core runtime operation once local models are installed.
+     - Uploaded audio is processed locally and is not sent to external services; temporary audio in request-scoped directories is cleaned up on both success and failure paths.
+     - Generated speech is returned in-memory as a WAV stream and never persisted to disk.
+     - Argon2id password hashing, opaque session tokens, CSRF double-submit protection, and owner-scoped transcript access with 404 isolation.
+     - Services bind to `127.0.0.1` by default.
+   - Clarified Project Roadmap: marked completed MVP milestones (S0, S1, S2, S4, M1), explicitly marked S3 (Live Voice Pipeline with WebSockets and VAD) as deferred post-MVP, and listed future scope (S5, S6).
+   - Audited and verified all markdown links and commands in `README.md` and `DEMO.md`.
+3. **Automated Verification:**
+   - Backend tests: `81 passed, 2 skipped` in 33.31s.
+   - Backend linter: `ruff check .` passed with 0 errors.
+   - Backend formatter: `ruff format --check .` passed (58 files formatted).
+   - Backend typechecker: `mypy app` passed (35 source files clean).
+   - Frontend typecheck: `tsc --noEmit` passed.
+   - Frontend linter: `eslint .` passed with 0 warnings/errors.
+   - Frontend tests: `24 passed` across 8 test suites.
+   - Frontend production build: `tsc -b && vite build` passed (built in 211ms).
+   - Docker Compose: `docker-compose config -q` passed with code 0.

@@ -1,86 +1,100 @@
 # Ceravox
 
-Ceravox is a local-first voice AI workstation for turning speech into useful
-work: transcripts, meeting notes, action items, and spoken answers. M1 adds
-demo resilience, a preflight system status dashboard, robust meeting notes
-loading/error states, multi-format transcript export (MD, TXT, JSON), sample
-meeting asset generation, and one-command development startup.
+Ceravox is a local-first voice AI workstation for turning speech into useful work: transcripts, meeting notes, action items, and spoken answers. Built with privacy and accessibility in mind, all audio decoding, speech-to-text, reasoning, and speech synthesis are executed on your local machine.
+
+---
+
+## Architecture
+
+Ceravox is designed as a modular, local-only workstation. The web dashboard communicates with a local FastAPI backend over authenticated HTTP, with speech models and Ollama running directly on host hardware.
+
+```text
+Browser Dashboard (React / TypeScript / Vite on 127.0.0.1:5173)
+      │
+      │ HTTP (Argon2id Session Cookie + CSRF Double-Submit)
+      ▼
+FastAPI Backend (Python on 127.0.0.1:8000)
+      ├─► SQLite Database (Owner-scoped user accounts and transcripts)
+      ├─► faster-whisper (Local ASR via CPU int8, Systran/faster-whisper-base)
+      ├─► Kokoro-82M (Local TTS synthesis, hexgrad/Kokoro-82M af_heart)
+      └─► Ollama Service (Local LLM inference via qwen2.5:3b on 127.0.0.1:11434)
+```
+
+- **Frontend:** React 19, TypeScript, and Vite single-page dashboard with zero external font/CSS CDN calls.
+- **Backend:** FastAPI with asynchronous endpoints, SQLAlchemy ORM, and Alembic database migrations.
+- **Audio & Storage:** PyAV for stream decoding and 16 kHz mono PCM normalization; ephemeral request-scoped directories.
+- **Local AI Engines:** faster-whisper (CTranslate2 CPU int8), Kokoro-82M TTS, and Ollama for meeting notes and contextual Q&A.
+
+---
+
+## Features
+
+- **Speech-to-Text (ASR):** Upload WAV, MP3, M4A, or OGG audio. Audio is validated, normalized to 16 kHz mono PCM, and transcribed locally with timestamped segments using faster-whisper.
+- **Text-to-Speech (TTS):** Convert text inputs (up to 2000 characters) into natural speech using Kokoro-82M (`af_heart` voice). Audio plays directly in the browser and can be downloaded as standard WAV.
+- **Meeting Notes & Action Items:** Analyze transcripts locally with Ollama (`qwen2.5:3b`) to produce executive summaries, key decisions, and prioritized action items.
+- **Interactive Transcript Q&A:** Ask questions about any recorded meeting. The local LLM answers using the transcript as context, with a one-click "Speak Answer" option to hear the response read aloud.
+- **Transcript Management & Multi-Format Export:** Saved transcripts are stored with ownership isolation and can be exported at any time in Markdown (`.md`), Plain Text (`.txt`), or structured JSON (`.json`).
+- **System Status Preflight:** A live diagnostics page reports real-time readiness for the database, faster-whisper ASR, Kokoro TTS, and Ollama LLM services before starting work.
+- **Synthetic Sample Generator:** Includes `scripts/generate_sample.py` to create synthetic meeting audio for testing without needing microphone recordings.
+
+---
 
 ## Cost and development workflow
 
-Ceravox is free to build and run. It does not use paid AI APIs, hosting,
-databases, model services, or dependencies that require a credit card. Runtime
-inference uses local models and services: faster-whisper, Kokoro, Silero VAD,
-and Ollama. Persistence uses SQLite, CI uses the GitHub Actions free tier, and
-Ceravox remains offline-capable after local models are installed.
+Ceravox is free to build and run. It does not use paid AI APIs, hosting, databases, model services, or dependencies that require a credit card. Persistence uses local SQLite, CI uses the GitHub Actions free tier, and runtime inference uses local models and services.
 
-Wispr Flow Pro is used as the primary development interface for specifications,
-user stories, architecture decisions, coding prompts, reviews, documentation,
-bug reports, commit messages, demo scripts, and submission copy. Wispr Flow Pro
-is not a Ceravox runtime dependency. Never enter passwords, session tokens,
-private audio, transcripts, model weights, or secrets into Wispr Flow.
+[Wispr Flow Pro](https://flow.wispr.ai) is used as the primary development interface for specifications, user stories, architecture decisions, coding prompts, reviews, documentation, bug reports, commit messages, demo scripts, and submission copy. Wispr Flow Pro is a development-time tool only and is not a runtime dependency. Development notes and prompts are maintained in [docs/wispr_usage_log.md](docs/wispr_usage_log.md). Never enter passwords, session tokens, private audio, transcripts, model weights, or secrets into Wispr Flow.
+
+---
 
 ## Requirements
 
-- Python 3.11+
-- Node.js 20+
-- Docker Desktop (optional, for Compose)
+- **Python:** 3.11+
+- **Node.js:** 20+ (Node 22 recommended)
+- **Ollama:** Installed locally with model `qwen2.5:3b` pulled (`ollama pull qwen2.5:3b`)
+- **Docker Desktop:** Optional (for Compose)
+- **Hardware:** 16 GB RAM recommended; works on CPU or local GPU (RTX 3050+).
 
-## S2 local models
+---
 
-Install models explicitly; Ceravox never downloads models at startup or during
-requests. The supported S2 defaults are:
+## Local models setup
 
-- faster-whisper base from `Systran/faster-whisper-base`, revision
-  `ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66`, MIT license; CPU/int8.
-- Kokoro-82M from `hexgrad/Kokoro-82M`, revision
-  `f3ff3571791e39611d31c381e3a41a3af07b4987`, Apache-2.0 license; English
-  `af_heart` voice and local `en_core_web_sm` English resources.
+Ceravox never downloads models at server startup or during client requests. Local models are installed explicitly:
 
-The model files are approximately 476 MB. Dependency downloads and temporary
-installation space are larger. Run the explicit installer from `backend/` only
-after reviewing the upstream licenses and pinned requirements:
+- **faster-whisper base:** `Systran/faster-whisper-base` (revision `ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66`, MIT license; CPU int8).
+- **Kokoro-82M:** `hexgrad/Kokoro-82M` (revision `f3ff3571791e39611d31c381e3a41a3af07b4987`, Apache-2.0 license; English `af_heart` voice and `en_core_web_sm`).
+
+The model weights total approximately 476 MB. To install:
 
 ```powershell
 cd backend
-..\.venv-bootstrap\Scripts\uv pip install --python .venv\Scripts\python.exe -r requirements.txt
-..\.venv-bootstrap\Scripts\uv pip install --python .venv\Scripts\python.exe https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
-.\.venv\Scripts\python scripts\install_models.py --download
+python -m pip install -r requirements.txt
+python -m pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+python scripts/install_models.py --download
 ```
 
-Model directories are `backend/models/faster-whisper-base` and
-`backend/models/kokoro`; they are ignored by Git. Configure locations, voices,
-storage, and limits with the `CERAVOX_*` variables in `backend/.env.example`.
-Do not put machine-specific absolute paths in committed documentation.
-
-After installation, verify local-only operation:
+Model files are placed in `backend/models/faster-whisper-base` and `backend/models/kokoro` (gitignored). After installation, verify offline capability:
 
 ```powershell
-.\.venv\Scripts\python scripts\check_offline.py
-.\.venv\Scripts\python scripts\check_offline.py --offline
+python scripts/check_offline.py
+python scripts/check_offline.py --offline
 ```
 
-S2 accepts WAV, MP3, M4A, and OGG uploads, normalizes them to 16 kHz mono PCM,
-deletes temporary audio after processing, and persists only owner-scoped
-transcript text/segments. Speech returns an in-memory WAV and does not persist
-generated audio. The dashboard provides Transcribe, Speak, export, playback,
-download, and system status views.
+---
 
 ## Run locally
 
-### One-command startup (Windows PowerShell)
+### Option 1: One-command startup (Windows PowerShell)
 
-From repository root:
+From the repository root:
 
 ```powershell
 .\scripts\dev.ps1
 ```
 
-This checks prerequisites, starts Ollama (if installed), runs the backend on
-`127.0.0.1:8000`, starts the Vite dashboard on `127.0.0.1:5173`, and displays
-troubleshooting guidance if any local models are missing.
+This verifies prerequisites, starts Ollama (if installed), launches the FastAPI backend on `127.0.0.1:8000`, and opens the Vite dashboard on `127.0.0.1:5173`.
 
-### Manual native startup
+### Option 2: Manual startup
 
 #### Backend
 
@@ -89,12 +103,11 @@ cd backend
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-alembic upgrade head
+python -m alembic upgrade head
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-The backend is available at <http://127.0.0.1:8000>. OpenAPI docs are at
-<http://127.0.0.1:8000/docs>.
+The backend is available at <http://127.0.0.1:8000>. Interactive OpenAPI docs are at <http://127.0.0.1:8000/docs>.
 
 #### Dashboard
 
@@ -106,15 +119,14 @@ npm run dev -- --host 127.0.0.1
 
 The dashboard is available at <http://127.0.0.1:5173>.
 
-### Docker Compose
+### Option 3: Docker Compose
 
 ```powershell
 docker compose config -q
 docker compose up --build
 ```
 
-Compose starts the backend, dashboard, and local Ollama service. Services are
-bound to localhost by default. In a second terminal, verify the running stack:
+Compose starts the backend, dashboard, and local Ollama service bound to `127.0.0.1`. In a second terminal:
 
 ```powershell
 curl.exe http://127.0.0.1:8000/health/live
@@ -125,16 +137,22 @@ docker compose logs --tail=50
 docker compose down
 ```
 
-## Checks
+---
+
+## Verification checks
+
+Run the full automated test and linting suite:
 
 ```powershell
+# Backend
 cd backend
-alembic upgrade head
-python -m pytest
+python -m alembic upgrade head
+python -m pytest -q
 python -m ruff check .
 python -m ruff format --check .
 python -m mypy app
 
+# Dashboard
 cd ..\dashboard
 npm run typecheck
 npm run lint
@@ -142,23 +160,41 @@ npm test -- --run
 npm run build
 ```
 
-## Privacy and repository safety
+---
 
-Core Ceravox features are designed to run locally after model installation.
-Do not commit secrets, recordings, transcripts, databases, backups, model
-weights, or generated audio. The repository includes a pre-commit secret scan
-and ignores common local data paths.
+## Privacy and security
 
-See [docs/CERAVOX_PLAN.md](docs/CERAVOX_PLAN.md),
-[docs/PROGRESS.md](docs/PROGRESS.md), and [DEMO.md](DEMO.md) for the product
-plan, current milestone, and demo instructions.
+- **Local Runtime Boundary:** No cloud inference and no external network calls during core runtime operation once local models are installed. Initial model downloads and optional Ollama model pulls require an internet connection during setup.
+- **Audio Handling:** Uploaded audio is processed locally and is not sent to external services. Temporary audio files created during decoding and normalization are managed in request-scoped directories and cleaned up on both success and failure exit paths.
+- **Generated Speech:** Synthesized speech is returned in-memory as an audio WAV stream and is never persisted to disk.
+- **Authentication & Authorization:** Passwords are encrypted with Argon2id. Sessions use opaque, hashed tokens stored in HTTP-only cookies. All state-mutating requests are protected with CSRF double-submit validation.
+- **Owner Isolation:** Transcripts are strictly scoped to the authenticated owner. Requests for transcripts owned by other users return indistinguishable 404 responses to prevent ID enumeration.
+- **Host Binding:** By default, services bind exclusively to `127.0.0.1` on the local machine.
+
+---
+
+## Project roadmap
+
+| Phase | Milestone | Scope & Deliverables | Status |
+|---|---|---|---|
+| **S0** | **Foundation** | Repository layout, Docker Compose, CI workflow, secret scanning baseline | ✅ Complete |
+| **S1** | **Auth & Shell** | Argon2id passwords, session tokens, CSRF double-submit, first-run admin, protected UI routes | ✅ Complete |
+| **S2** | **Core Voice APIs** | Bounded multipart upload, faster-whisper ASR, Kokoro-82M TTS, model health probes | ✅ Complete |
+| **S4** | **Meeting Intelligence** | Owner-scoped transcripts, Ollama `qwen2.5:3b` summaries & action items, contextual Q&A, Speak Answer | ✅ Complete |
+| **M1** | **Usability & Polish** | Preflight System Status view, multi-format export (MD/TXT/JSON), synthetic sample audio generator, dev startup script | ✅ Complete |
+| **S3** | **Live Voice Pipeline** | Real-time WebSocket audio streaming, live Silero VAD, barge-in, interactive voice assistant | ⏸️ Deferred (Post-MVP) |
+| **S5** | **Reliability & Ops** | Automated backup/restore CLI, operational metrics, extended end-to-end integration suite | 🔮 Future Roadmap |
+| **S6** | **Hardening** | Multi-speaker diarization, custom voice profiles, accessibility audits | 🔮 Future Roadmap |
+
+---
 
 ## Hackathon submission
 
-Ceravox was submitted to **No Hands: The Wispr Challenge**.
+Ceravox was built and submitted for **No Hands: The Wispr Challenge**.
 
-- Submission index: [docs/SUBMISSION.md](docs/SUBMISSION.md)
-- Demo instructions: [DEMO.md](DEMO.md)
-- Demo recording script: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)
-- Development plan: [docs/CERAVOX_PLAN.md](docs/CERAVOX_PLAN.md)
-- Progress and verification evidence: [docs/PROGRESS.md](docs/PROGRESS.md)
+- **Submission Index:** [docs/SUBMISSION.md](docs/SUBMISSION.md)
+- **Judge Setup & Demo Guide:** [DEMO.md](DEMO.md)
+- **Demo Recording Script:** [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)
+- **Wispr Flow Usage Log:** [docs/wispr_usage_log.md](docs/wispr_usage_log.md)
+- **Development Plan:** [docs/CERAVOX_PLAN.md](docs/CERAVOX_PLAN.md)
+- **Progress & Verification Evidence:** [docs/PROGRESS.md](docs/PROGRESS.md)

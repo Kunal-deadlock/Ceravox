@@ -21,6 +21,7 @@ dist/
 
 # OpenCode workspace metadata and attachments
 .opencode/
+opencode.jsonc
 
 # Environment and credentials
 .env
