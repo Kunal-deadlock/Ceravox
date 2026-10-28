@@ -10,6 +10,7 @@ import { Setup } from "./pages/Setup";
 import { Transcribe } from "./pages/Transcribe";
 import { Speak } from "./pages/Speak";
 import { ModelStatus } from "./components/ModelStatus";
+import { MeetingNotes } from "./pages/MeetingNotes";
 
 function AuthenticatedRoutes({ user, onLogout }: { user: UserProfile; onLogout: () => void }) {
   return (
@@ -19,7 +20,7 @@ function AuthenticatedRoutes({ user, onLogout }: { user: UserProfile; onLogout: 
         <Route path="transcribe" element={<Transcribe />} />
         <Route path="speak" element={<Speak />} />
         <Route path="live-assistant" element={<Placeholder title="Live Assistant" />} />
-        <Route path="meeting-notes" element={<Placeholder title="Meeting Notes" />} />
+        <Route path="meeting-notes" element={<MeetingNotes />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

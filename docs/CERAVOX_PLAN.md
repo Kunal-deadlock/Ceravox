@@ -47,6 +47,17 @@ Ceravox must remain offline-capable after local models are installed.
    performance checks.
 8. **S7 Release:** clean-machine test, documentation, demo, and release freeze.
 
+## Lean hackathon delivery priority (2026-10-28)
+
+Keep milestone identifiers; deliver in this order: **A.** finish S2 manual
+acceptance; **B.** implement the minimum S4 slice (local Ollama summary/action
+items, transcript Q&A and one Meeting Notes screen); **C.** stabilize and prepare
+submission; **D.** attempt S3 real-time features only if time remains. S3 is
+deferred from the minimum hackathon release, not complete. Preserve existing
+security and completed functionality. Backup/restore remains deferred unless
+already implemented. Docker runtime remains subject to the recorded local engine
+environment caveat.
+
 Security rules apply throughout: bind local services to localhost, never log
 private audio or transcripts, validate uploads, use maintained cryptography,
 and never commit secrets, databases, recordings, backups, or model weights.

@@ -18,6 +18,7 @@ export type ModelResponse = { faster_whisper: ModelStatus; kokoro: ModelStatus; 
 export type TranscriptSegment = { id: string; start_ms: number; end_ms: number; text: string };
 export type Transcript = { id: string; storage_id: string; source_type: string; text: string; language: string | null; duration: number; created_at: string; segments: TranscriptSegment[] };
 export type TranscriptList = { items: Omit<Transcript, "text" | "segments">[]; limit: number; offset: number };
+export type MeetingResult = { transcript_id: string; kind: "summary" | "answer"; text: string };
 
 export class ApiError extends Error {
   constructor(
@@ -113,6 +114,12 @@ export async function listTranscripts(): Promise<TranscriptList> { return reques
 export async function getTranscript(id: string): Promise<Transcript> { return request<Transcript>(`/v1/transcripts/${encodeURIComponent(id)}`); }
 export async function generateSpeech(text: string, voice: string): Promise<Blob> {
   return binaryRequest("/v1/audio/speech", { method: "POST", headers: await csrfHeaders(), body: JSON.stringify({ text, voice, response_format: "wav" }) });
+}
+export async function generateSummary(id: string): Promise<MeetingResult> {
+  return request<MeetingResult>(`/v1/transcripts/${encodeURIComponent(id)}/summary`, { method: "POST", headers: await csrfHeaders(), body: "{}" });
+}
+export async function askTranscript(id: string, question: string): Promise<MeetingResult> {
+  return request<MeetingResult>(`/v1/transcripts/${encodeURIComponent(id)}/questions`, { method: "POST", headers: await csrfHeaders(), body: JSON.stringify({ question }) });
 }
 
 export async function setupAdmin(email: string, password: string): Promise<UserProfile> {

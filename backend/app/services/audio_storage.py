@@ -136,4 +136,5 @@ def normalize(
             raise voice_error(422, "invalid_audio", "Audio could not be decoded") from None
     if not count:
         raise voice_error(422, "empty_audio", "Audio contains no samples")
-    return np.fromfile(directory / "normalized.pcm", dtype="<i2").astype(np.float32) / 32768
+    samples = np.fromfile(directory / "normalized.pcm", dtype="<i2").astype(np.float32)
+    return samples / np.float32(32768)

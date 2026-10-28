@@ -139,3 +139,13 @@ and ignores common local data paths.
 See [docs/CERAVOX_PLAN.md](docs/CERAVOX_PLAN.md),
 [docs/PROGRESS.md](docs/PROGRESS.md), and [DEMO.md](DEMO.md) for the product
 plan, current milestone, and demo instructions.
+
+## Hackathon submission
+
+Ceravox was submitted to **No Hands: The Wispr Challenge**.
+
+- Submission index: [docs/SUBMISSION.md](docs/SUBMISSION.md)
+- Demo instructions: [DEMO.md](DEMO.md)
+- Demo recording script: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)
+- Development plan: [docs/CERAVOX_PLAN.md](docs/CERAVOX_PLAN.md)
+- Progress and verification evidence: [docs/PROGRESS.md](docs/PROGRESS.md)

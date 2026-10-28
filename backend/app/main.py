@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 from app.api.audio import router as audio_router
 from app.api.auth import router as auth_router
 from app.api.health import router as health_router
+from app.api.meetings import router as meetings_router
 from app.api.models import router as models_router
 from app.api.speech import router as speech_router
 from app.api.transcripts import router as transcripts_router
@@ -49,6 +50,7 @@ def create_app() -> FastAPI:
     application.include_router(audio_router)
     application.include_router(speech_router)
     application.include_router(transcripts_router)
+    application.include_router(meetings_router)
     application.include_router(models_router)
 
     @application.middleware("http")

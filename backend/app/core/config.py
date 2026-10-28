@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     dashboard_url: str = "http://127.0.0.1:5173"
     database_url: str = "sqlite:///./ceravox.db"
     ollama_url: str = "http://127.0.0.1:11434"
+    ollama_model: str = Field(default="qwen2.5:3b", min_length=1, max_length=128)
+    ollama_timeout_seconds: float = Field(default=90.0, gt=0, le=300)
+    meeting_max_transcript_chars: int = Field(default=20000, ge=1000, le=100000)
     session_ttl_seconds: int = 8 * 60 * 60
     cookie_secure: bool = False
     login_failure_delay_seconds: float = 0.1

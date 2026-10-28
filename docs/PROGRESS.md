@@ -1,5 +1,62 @@
 # Ceravox Progress
 
+## Lean hackathon delivery priority (2026-10-28)
+
+Priority: A) finish S2 manual acceptance; B) minimum S4 meeting intelligence;
+C) stabilize and prepare submission; D) attempt S3 real-time only if time remains.
+S3 is deferred from the minimum release, not complete. Existing security and
+completed work remain in scope; backup/restore is deferred unless already built.
+Docker runtime remains blocked by this environment's unavailable Linux engine.
+
+S2 manual acceptance is pending user confirmation. Native dashboard URL will be
+`http://127.0.0.1:5173` when its local dependencies are available; this workspace
+currently has no backend virtual environment or `dashboard/node_modules`, so
+services could not be started here. No browser playback/offline check is claimed.
+The prior suite's skips: the real-model voice round-trip is opt-in and its
+coverage was separately exercised with installed models/network denial per the
+existing evidence below; required release coverage is therefore not missing.
+The symlink rejection test skips only when Windows disallows symlink creation;
+the ordinary path-safety/cleanup coverage still runs, so this is host capability,
+not a functional coverage requirement for normal operation.
+
+### Minimum S4 implementation status
+
+- Added configurable local Ollama model (`qwen2.5:3b`), timeout, and a 20,000
+  character transcript limit; oversized transcripts are rejected without
+  truncation. Request question bytes and model output are bounded.
+- Added authenticated, CSRF-protected, owner-scoped summary/action-item and Q&A
+  endpoints. No schema change; generated content is returned as plain text.
+- Replaced the Meeting Notes placeholder with transcript selection, generation,
+  Q&A, and optional speech using the configured Kokoro voice.
+- Ollama model downloaded locally (1.9 GB); real adapter inference with synthetic
+  transcript data returned a summary/action items and answered a question.
+- Pinned SQLAlchemy 2.0.46 and numpy 2.2.6 for Python 3.14 compatibility.
+- Installed backend virtual environment and dashboard dependencies (`npm ci`).
+- Automated tests and verification:
+  - Backend: `pytest -q` — 63 passed, 2 skipped (100%)
+  - Backend lint: `ruff check .` and `ruff format --check .` — passed (55 files)
+  - Backend types: `mypy app` — passed (0 errors in 34 source files)
+  - Backend dependencies: `pip check` — no broken requirements found
+  - Database migrations: `alembic upgrade head` — applied cleanly
+  - Frontend types: `npm run typecheck` — passed
+  - Frontend lint: `npm run lint` — passed
+  - Frontend tests: `npm test -- --run` — 14 passed (6 test files)
+  - Frontend build: `npm run build` — passed (dist/ created)
+  - Container config: `docker compose config -q` — valid
+- Submission assets created:
+  - `docs/SUBMISSION.md`: Full hackathon submission index and checklist
+  - `docs/DEMO_SCRIPT.md`: Two-minute video demo script covering core user flows
+  - `DEMO.md`: Step-by-step local setup, execution, and verification guide
+  - `README.md`: Updated with hackathon submission references
+
+### S2 manual checks requested
+
+1. Open the dashboard and use Speak to generate speech; confirm audible playback.
+2. Upload that WAV on Transcribe; confirm transcript, refresh, and confirm it persists.
+3. Disconnect WAN while keeping localhost available; repeat speech and transcription.
+
+Report pass/fail for each check. Keep S2 manual acceptance open until confirmed.
+
 ## Project constraints
 
 - Ceravox remains free to build and run: no paid AI APIs, hosting, databases,
