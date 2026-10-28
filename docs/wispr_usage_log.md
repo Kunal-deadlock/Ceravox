@@ -27,3 +27,4 @@ weights, and secrets out of this file and out of Wispr Flow.
 | 2026-10-28 | M1 Task 1 | System status endpoint GET /api/system/status implementation and verification | 11 new tests in test_system_status.py, 74 passed total, ruff/format/mypy clean; safe component readiness reported |
 | 2026-10-28 | M1 Task 2 | Preflight status UI page and integration | 4 new tests in SystemStatus.test.tsx, 18 passed total, typecheck/lint/build clean; System Status page added to nav |
 | 2026-10-28 | M1 Task 3 | Meeting notes loading and error states | 5 new tests in MeetingNotes.test.tsx, 23 passed total; per-action loading indicators, input lockouts during generation, clean retry |
+| 2026-10-28 | M1 Task 4 | Transcript export in Markdown, Plain text, and JSON | 7 new backend tests (81 passed), 1 new frontend test (24 passed), safe attachment downloads for owners only |

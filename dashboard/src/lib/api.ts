@@ -119,6 +119,9 @@ export async function transcribeAudio(file: File): Promise<Transcript> {
 }
 export async function listTranscripts(): Promise<TranscriptList> { return request<TranscriptList>("/v1/transcripts"); }
 export async function getTranscript(id: string): Promise<Transcript> { return request<Transcript>(`/v1/transcripts/${encodeURIComponent(id)}`); }
+export async function exportTranscript(id: string, format: "md" | "txt" | "json"): Promise<Blob> {
+  return binaryRequest(`/v1/transcripts/${encodeURIComponent(id)}/export?format=${encodeURIComponent(format)}`);
+}
 export async function generateSpeech(text: string, voice: string): Promise<Blob> {
   return binaryRequest("/v1/audio/speech", { method: "POST", headers: await csrfHeaders(), body: JSON.stringify({ text, voice, response_format: "wav" }) });
 }

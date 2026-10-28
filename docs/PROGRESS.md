@@ -98,28 +98,30 @@ messages, tokens, or secrets.
 
 #### Task 4 — Transcript export
 
+**Status:** COMPLETE (81 backend tests passed, 24 frontend tests passed, typecheck, lint, and build passed)
+
 **Tests to write first (`backend/tests/test_transcripts.py` additions)**
 
-- [ ] Authenticated owner can download `.md` format
-- [ ] Authenticated owner can download `.txt` format
-- [ ] Authenticated owner can download `.json` format
-- [ ] Unauthenticated request returns 401
-- [ ] Non-owner request returns indistinguishable 404 (not 403)
-- [ ] Invalid transcript ID handled safely
-- [ ] Invalid format parameter rejected safely
-- [ ] Exported MD, TXT, and JSON contain expected transcript content
+- [x] Authenticated owner can download `.md` format
+- [x] Authenticated owner can download `.txt` format
+- [x] Authenticated owner can download `.json` format
+- [x] Unauthenticated request returns 401
+- [x] Non-owner request returns indistinguishable 404 (not 403)
+- [x] Invalid transcript ID handled safely
+- [x] Invalid format parameter rejected safely
+- [x] Exported MD, TXT, and JSON contain expected transcript content
 
 **Frontend tests (`dashboard/src/__tests__/Transcribe.test.tsx` additions)**
 
-- [ ] Download MD button triggers correct API call
-- [ ] Download TXT button triggers correct API call
-- [ ] Download JSON button triggers correct API call
+- [x] Download MD button triggers correct API call
+- [x] Download TXT button triggers correct API call
+- [x] Download JSON button triggers correct API call
 
 **Implementation files**
 
 - `backend/app/api/transcripts.py` (add export endpoint)
-- `dashboard/src/lib/api.ts` (add `downloadTranscript()`)
-- `dashboard/src/pages/Transcribe.tsx` (add export buttons)
+- `dashboard/src/lib/api.ts` (add `exportTranscript()`)
+- `dashboard/src/pages/Transcribe.tsx` (add MD, TXT, JSON export buttons)
 
 #### Task 5 — Sample meeting asset
 
