@@ -1270,3 +1270,45 @@ Make the GitHub repository clean, professional, and easy for judges to evaluate 
    - Frontend tests: `24 passed` across 8 test suites.
    - Frontend production build: `tsc -b && vite build` passed (built in 211ms).
    - Docker Compose: `docker-compose config -q` passed with code 0.
+
+
+---
+
+## 2026-10-29 — Live Assistant (Interactive Voice Chat Implementation)
+
+### Scope and goals
+Replaced the "Coming in a later milestone" placeholder on the Live Assistant page with a full offline-first interactive voice chat workflow connecting the browser microphone, local faster-whisper ASR, local Ollama LLM (`qwen2.5:3b`), and local Kokoro-82M TTS.
+
+### Changes made
+1. **Backend Endpoint (`backend/app/api/assistant.py`):**
+   - Added `POST /v1/assistant/chat` requiring session authentication and CSRF double-submit protection.
+   - Validates user input message (1–1000 characters).
+   - Invocates local Ollama (`qwen2.5:3b`) via `OllamaClient.generate()` with tailored system prompt.
+   - Robust error handling for `OllamaUnavailable` (503), `OllamaTimeout` (504), and `OllamaMalformedResponse` (502).
+   - Registered router in `backend/app/main.py` and included in private-cache headers.
+2. **Backend Tests (`backend/tests/test_assistant.py`):**
+   - 6 new automated tests verifying authentication enforcement, CSRF protection, message validation, successful replies, and error mappings. Total backend test suite: 87 passed, 2 skipped.
+3. **Frontend In-Browser WAV Audio Recorder (`dashboard/src/lib/audioRecorder.ts`):**
+   - Pure Web Audio API implementation (16 kHz mono, Float32 -> 16-bit PCM conversion with 44-byte standard RIFF WAV header).
+   - Zero external npm dependencies.
+4. **Frontend API Client (`dashboard/src/lib/api.ts`):**
+   - Added `askAssistant(message: string): Promise<AssistantReply>` contract and endpoint invocation.
+5. **Frontend Live Assistant Page (`dashboard/src/pages/LiveAssistant.tsx`):**
+   - Interactive chat message thread with timestamps and role-based speech bubble styling.
+   - Dual-input mode: Microphone recording with live duration timer or direct text message input.
+   - Auto-speak response toggle using Kokoro-82M synthesized audio in-browser playback.
+   - Clear chat and granular error alerts.
+6. **Dashboard Routing (`dashboard/src/App.tsx`):**
+   - Replaced `Placeholder` component with `LiveAssistant`.
+7. **Frontend Unit Tests (`dashboard/src/__tests__/LiveAssistant.test.tsx`):**
+   - 5 comprehensive tests covering initial render, auto-speak defaults, empty input inhibition, chat reply rendering, and API error surfacing. Total frontend test suite: 29 passed across 9 test suites.
+8. **Automated Verification:**
+   - Backend tests: `87 passed, 2 skipped` in 16.03s.
+   - Backend linter: `ruff check .` passed with 0 errors.
+   - Backend formatter: `ruff format --check .` passed (60 files formatted).
+   - Backend typechecker: `mypy app` passed (36 source files clean).
+   - Frontend typecheck: `tsc --noEmit` passed.
+   - Frontend linter: `eslint .` passed with 0 warnings/errors.
+   - Frontend tests: `29 passed` across 9 test suites.
+   - Frontend production build: `tsc -b && vite build` passed.
+   - Docker Compose: `docker-compose config -q` passed.

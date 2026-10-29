@@ -132,6 +132,16 @@ export async function askTranscript(id: string, question: string): Promise<Meeti
   return request<MeetingResult>(`/v1/transcripts/${encodeURIComponent(id)}/questions`, { method: "POST", headers: await csrfHeaders(), body: JSON.stringify({ question }) });
 }
 
+export type AssistantReply = { reply: string };
+
+export async function askAssistant(message: string): Promise<AssistantReply> {
+  return request<AssistantReply>("/v1/assistant/chat", {
+    method: "POST",
+    headers: await csrfHeaders(),
+    body: JSON.stringify({ message }),
+  });
+}
+
 export async function setupAdmin(email: string, password: string): Promise<UserProfile> {
   return request<UserProfile>("/v1/auth/setup", {
     method: "POST",

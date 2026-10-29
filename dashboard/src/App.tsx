@@ -5,7 +5,7 @@ import { ApiError, getAuthStatus, getCsrfToken, getMe, logout } from "./lib/api"
 import type { UserProfile } from "./lib/api";
 import { Dashboard } from "./pages/Dashboard";
 import { Login } from "./pages/Login";
-import { Placeholder } from "./pages/Placeholder";
+import { LiveAssistant } from "./pages/LiveAssistant";
 import { Setup } from "./pages/Setup";
 import { Transcribe } from "./pages/Transcribe";
 import { Speak } from "./pages/Speak";
@@ -20,7 +20,7 @@ function AuthenticatedRoutes({ user, onLogout }: { user: UserProfile; onLogout: 
         <Route index element={<><ModelStatus /><section className="status-card"><div><p className="card-label">Private by default</p><h2>Ready for local voice workflows</h2><p className="muted">Transcription and speech stay on this machine after model installation.</p></div><span className="status-pill status-ready">local</span></section></>} />
         <Route path="transcribe" element={<Transcribe />} />
         <Route path="speak" element={<Speak />} />
-        <Route path="live-assistant" element={<Placeholder title="Live Assistant" />} />
+        <Route path="live-assistant" element={<LiveAssistant />} />
         <Route path="meeting-notes" element={<MeetingNotes />} />
         <Route path="system-status" element={<SystemStatus />} />
       </Route>

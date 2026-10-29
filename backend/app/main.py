@@ -8,6 +8,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.api.assistant import router as assistant_router
 from app.api.audio import router as audio_router
 from app.api.auth import router as auth_router
 from app.api.health import router as health_router
@@ -54,6 +55,7 @@ def create_app() -> FastAPI:
     application.include_router(meetings_router)
     application.include_router(models_router)
     application.include_router(system_router)
+    application.include_router(assistant_router)
 
     @application.middleware("http")
     async def private_cache(
@@ -61,7 +63,7 @@ def create_app() -> FastAPI:
     ) -> Response:
         response = await call_next(request)
         if request.url.path.startswith(
-            ("/v1/audio", "/v1/transcripts", "/v1/models", "/api/system")
+            ("/v1/audio", "/v1/transcripts", "/v1/models", "/api/system", "/v1/assistant")
         ):
             response.headers["Cache-Control"] = "no-store"
         return response
