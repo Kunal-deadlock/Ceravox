@@ -46,7 +46,9 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def validate_database_url(self) -> Self:
         if self.database_url.startswith("postgres://"):
-            self.database_url = self.database_url.replace("postgres://", "postgresql://", 1)
+            self.database_url = self.database_url.replace("postgres://", "postgresql+psycopg2://", 1)
+        elif self.database_url.startswith("postgresql://"):
+            self.database_url = self.database_url.replace("postgresql://", "postgresql+psycopg2://", 1)
         return self
 
     @model_validator(mode="after")
