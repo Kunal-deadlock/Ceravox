@@ -88,7 +88,17 @@ python scripts/check_offline.py --offline
 
 ## Run locally
 
-### Option 1: One-command startup (Windows PowerShell)
+### Option 0: Live public demo (one-command — keeps Vercel live for all users)
+
+```powershell
+# First time only: copy .env.local.example → .env.local and add your Vercel token
+# (https://vercel.com/account/tokens)
+.\scripts\start.ps1
+```
+
+This starts the FastAPI backend, creates a Cloudflare tunnel, automatically updates the `VITE_API_BASE_URL` on Vercel, and triggers a redeploy — so **https://ceravox-nova.vercel.app is live for all users** within ~30 seconds. Keep the window open while demoing.
+
+### Option 1: One-command local startup (Windows PowerShell)
 
 From the repository root:
 
