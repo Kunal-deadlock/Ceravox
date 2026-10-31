@@ -31,10 +31,12 @@ FastAPI Backend (Python on 127.0.0.1:8000)
 
 - **Speech-to-Text (ASR):** Upload WAV, MP3, M4A, or OGG audio. Audio is validated, normalized to 16 kHz mono PCM, and transcribed locally with timestamped segments using faster-whisper.
 - **Text-to-Speech (TTS):** Convert text inputs (up to 2000 characters) into natural speech using Kokoro-82M (`af_heart` voice). Audio plays directly in the browser and can be downloaded as standard WAV.
+- **Live Voice Assistant:** Offline conversational voice AI combining faster-whisper speech recognition, Qwen2.5 local reasoning, and Kokoro auto-spoken answers, with Wispr Flow hands-free dictation support.
 - **Meeting Notes & Action Items:** Analyze transcripts locally with Ollama (`qwen2.5:3b`) to produce executive summaries, key decisions, and prioritized action items.
 - **Interactive Transcript Q&A:** Ask questions about any recorded meeting. The local LLM answers using the transcript as context, with a one-click "Speak Answer" option to hear the response read aloud.
 - **Transcript Management & Multi-Format Export:** Saved transcripts are stored with ownership isolation and can be exported at any time in Markdown (`.md`), Plain Text (`.txt`), or structured JSON (`.json`).
 - **System Status Preflight:** A live diagnostics page reports real-time readiness for the database, faster-whisper ASR, Kokoro TTS, and Ollama LLM services before starting work.
+- **Local Authentication & Multi-Account Registration:** Argon2id password hashing, CSRF double-submit protection, and owner-scoped data isolation with tabbed sign-in and account registration.
 - **Synthetic Sample Generator:** Includes `scripts/generate_sample.py` to create synthetic meeting audio for testing without needing microphone recordings.
 
 ---
