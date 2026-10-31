@@ -1,5 +1,7 @@
 # Ceravox — Setup and Demo
 
+> **Architecture & Deployment Note:** Ceravox is a local-first AI application with a hosted companion. Public hosted AI inference is unavailable; full inference requires local setup.
+
 ## Requirements
 
 - **Python 3.11+** (Python 3.14 confirmed working with pinned dependencies)
