@@ -23,6 +23,10 @@ def get_voice_runtime(request: Request) -> ModelService:
 def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
     raw_token = request.cookies.get(SESSION_COOKIE)
     if not raw_token:
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            raw_token = auth_header.removeprefix("Bearer ").strip()
+    if not raw_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=UNAUTHORIZED)
     session = db.scalar(
         select(SessionRecord).where(

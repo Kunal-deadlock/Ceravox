@@ -31,10 +31,11 @@ class UserResponse(BaseModel):
     id: str
     email: str
     is_admin: bool
+    token: str | None = None
 
 
-def safe_user(user: User) -> UserResponse:
-    return UserResponse(id=str(user.id), email=user.email, is_admin=user.is_admin)
+def safe_user(user: User, token: str | None = None) -> UserResponse:
+    return UserResponse(id=str(user.id), email=user.email, is_admin=user.is_admin, token=token)
 
 
 def service() -> AuthService:
@@ -99,7 +100,7 @@ async def register(payload: Credentials, db: Db, response: Response) -> UserResp
         samesite=samesite,
         path="/",
     )
-    return safe_user(user)
+    return safe_user(user, token=raw_token)
 
 
 @router.post("/auth/login", dependencies=[Depends(require_csrf)])
@@ -121,7 +122,7 @@ async def login(payload: Credentials, db: Db, response: Response) -> UserRespons
         samesite=samesite,
         path="/",
     )
-    return safe_user(user)
+    return safe_user(user, token=raw_token)
 
 
 @router.post(
@@ -132,10 +133,13 @@ async def login(payload: Credentials, db: Db, response: Response) -> UserRespons
 def logout(request: Request, response: Response, db: Db, _: CurrentUser) -> None:
     settings = get_settings()
     samesite = "none" if settings.cookie_secure else "lax"
-    service().logout(db, request.cookies.get(SESSION_COOKIE))
-    response.delete_cookie(
-        SESSION_COOKIE, path="/", samesite=samesite, secure=settings.cookie_secure
-    )
+    raw_token = request.cookies.get(SESSION_COOKIE)
+    if not raw_token:
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            raw_token = auth_header.removeprefix("Bearer ").strip()
+    service().logout(db, raw_token)
+    response.delete_cookie(SESSION_COOKIE, path="/", samesite=samesite, secure=settings.cookie_secure)
     response.delete_cookie(CSRF_COOKIE, path="/", samesite=samesite, secure=settings.cookie_secure)
 
 

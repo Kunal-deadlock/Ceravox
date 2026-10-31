@@ -28,14 +28,22 @@ def set_csrf_cookie(response: Response, token: str) -> None:
 
 
 async def require_csrf(request: Request) -> None:
+    # Explicit Authorization header is immune to ambient CSRF attacks
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("Bearer "):
+        return
+
     cookie_token = request.cookies.get(CSRF_COOKIE)
     header_token = request.headers.get(CSRF_HEADER)
-    if (
-        not cookie_token
-        or not header_token
-        or not secrets.compare_digest(cookie_token, header_token)
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail={"code": "csrf_failed", "message": "CSRF validation failed"},
-        )
+    if cookie_token:
+        if not header_token or not secrets.compare_digest(cookie_token, header_token):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={"code": "csrf_failed", "message": "CSRF validation failed"},
+            )
+    else:
+        if not header_token:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={"code": "csrf_failed", "message": "CSRF validation failed"},
+            )

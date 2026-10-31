@@ -7,6 +7,7 @@ export type UserProfile = {
   id: string;
   email: string;
   is_admin: boolean;
+  token?: string | null;
 };
 
 export type AuthStatus = {
@@ -33,19 +34,38 @@ export class ApiError extends Error {
   }
 }
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
+export { getApiBaseUrl, setApiBaseUrl, getAuthToken, setAuthToken } from "./config";
+import { getApiBaseUrl, getAuthToken, setAuthToken } from "./config";
+
 let csrfToken: string | null = null;
+
+function authHeaders(): Record<string, string> {
+  const token = getAuthToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const isForm = options.body instanceof FormData;
-  const response = await fetch(`${apiBaseUrl}${path}`, {
-    ...options,
-    credentials: "include",
-    headers: {
-      ...(isForm ? {} : { "Content-Type": "application/json" }),
-      ...(options.headers ?? {}),
-    },
-  });
+  const baseUrl = getApiBaseUrl();
+  let response: Response;
+  try {
+    response = await fetch(`${baseUrl}${path}`, {
+      ...options,
+      credentials: "include",
+      headers: {
+        ...(isForm ? {} : { "Content-Type": "application/json" }),
+        ...authHeaders(),
+        ...(options.headers ?? {}),
+      },
+    });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Network error";
+    throw new ApiError(
+      `Cannot connect to Ceravox backend at "${baseUrl || "same-origin"}". ${msg}`,
+      0,
+    );
+  }
+
   if (!response.ok) {
     const payload = (await response.json().catch(() => null)) as
       | { error?: { message?: string } }
@@ -59,7 +79,26 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 async function binaryRequest(path: string, options: RequestInit = {}): Promise<Blob> {
-  const response = await fetch(`${apiBaseUrl}${path}`, { ...options, credentials: "include", headers: { "Content-Type": "application/json", ...(options.headers ?? {}) } });
+  const baseUrl = getApiBaseUrl();
+  let response: Response;
+  try {
+    response = await fetch(`${baseUrl}${path}`, {
+      ...options,
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...authHeaders(),
+        ...(options.headers ?? {}),
+      },
+    });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Network error";
+    throw new ApiError(
+      `Cannot connect to Ceravox backend at "${baseUrl || "same-origin"}". ${msg}`,
+      0,
+    );
+  }
+
   if (!response.ok) {
     const payload = (await response.json().catch(() => null)) as { error?: { message?: string } } | null;
     throw new ApiError(payload?.error?.message ?? "Request failed", response.status);
@@ -75,8 +114,9 @@ async function csrfHeaders(): Promise<Record<string, string>> {
 }
 
 export async function getHealth(): Promise<HealthStatus> {
+  const baseUrl = getApiBaseUrl();
   try {
-    const response = await fetch(`${apiBaseUrl}/health/ready`);
+    const response = await fetch(`${baseUrl}/health/ready`);
     const payload = (await response.json()) as Partial<HealthStatus>;
     if (!response.ok) {
       return {
@@ -143,33 +183,49 @@ export async function askAssistant(message: string): Promise<AssistantReply> {
 }
 
 export async function setupAdmin(email: string, password: string): Promise<UserProfile> {
-  return request<UserProfile>("/v1/auth/setup", {
+  const user = await request<UserProfile>("/v1/auth/setup", {
     method: "POST",
     headers: await csrfHeaders(),
     body: JSON.stringify({ email, password }),
   });
+  if (user.token) {
+    setAuthToken(user.token);
+  }
+  return user;
 }
 
 export async function login(email: string, password: string): Promise<UserProfile> {
-  return request<UserProfile>("/v1/auth/login", {
+  const user = await request<UserProfile>("/v1/auth/login", {
     method: "POST",
     headers: await csrfHeaders(),
     body: JSON.stringify({ email, password }),
   });
+  if (user.token) {
+    setAuthToken(user.token);
+  }
+  return user;
 }
 
 export async function logout(): Promise<void> {
-  await request<void>("/v1/auth/logout", {
-    method: "POST",
-    headers: await csrfHeaders(),
-  });
-  csrfToken = null;
+  try {
+    await request<void>("/v1/auth/logout", {
+      method: "POST",
+      headers: await csrfHeaders(),
+    });
+  } finally {
+    setAuthToken(null);
+    csrfToken = null;
+  }
 }
 
 export async function registerUser(email: string, password: string): Promise<UserProfile> {
-  return request<UserProfile>("/v1/auth/register", {
+  const user = await request<UserProfile>("/v1/auth/register", {
     method: "POST",
     headers: await csrfHeaders(),
     body: JSON.stringify({ email, password }),
   });
+  if (user.token) {
+    setAuthToken(user.token);
+  }
+  return user;
 }
