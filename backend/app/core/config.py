@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     ollama_url: str = "http://127.0.0.1:11434"
     ollama_model: str = Field(default="qwen2.5:3b", min_length=1, max_length=128)
     ollama_timeout_seconds: float = Field(default=90.0, gt=0, le=300)
+    groq_api_key: str = ""
+    groq_model: str = Field(default="llama-3.1-8b-instant", min_length=1, max_length=128)
+    groq_asr_model: str = Field(default="whisper-large-v3-turbo", min_length=1, max_length=128)
     meeting_max_transcript_chars: int = Field(default=20000, ge=1000, le=100000)
     session_ttl_seconds: int = 8 * 60 * 60
     cookie_secure: bool = False
@@ -46,9 +49,13 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def validate_database_url(self) -> Self:
         if self.database_url.startswith("postgres://"):
-            self.database_url = self.database_url.replace("postgres://", "postgresql+psycopg2://", 1)
+            self.database_url = self.database_url.replace(
+                "postgres://", "postgresql+psycopg2://", 1
+            )
         elif self.database_url.startswith("postgresql://"):
-            self.database_url = self.database_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+            self.database_url = self.database_url.replace(
+                "postgresql://", "postgresql+psycopg2://", 1
+            )
         return self
 
     @model_validator(mode="after")

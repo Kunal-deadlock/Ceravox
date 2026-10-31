@@ -6,7 +6,9 @@ export function getApiBaseUrl(): string {
       if (saved && (saved.includes("onrender.com") || saved.includes("trycloudflare.com"))) {
         localStorage.removeItem("ceravox_api_url");
       }
-    } catch {}
+    } catch {
+      /* ignore */
+    }
     if (!envUrl) return "";
   }
 
@@ -20,7 +22,9 @@ export function getApiBaseUrl(): string {
       }
       return clean;
     }
-  } catch {}
+  } catch {
+    /* ignore */
+  }
   return envUrl;
 }
 
@@ -32,7 +36,9 @@ export function setApiBaseUrl(url: string): void {
     } else {
       localStorage.removeItem("ceravox_api_url");
     }
-  } catch {}
+  } catch {
+    /* ignore */
+  }
 }
 
 export function getAuthToken(): string | null {
@@ -50,5 +56,7 @@ export function setAuthToken(token: string | null): void {
     } else {
       localStorage.removeItem("ceravox_token");
     }
-  } catch {}
+  } catch {
+    /* ignore */
+  }
 }

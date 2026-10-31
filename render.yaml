@@ -19,6 +19,8 @@ services:
         fromDatabase:
           name: ceravox-db
           property: connectionString
+      - key: CERAVOX_GROQ_API_KEY
+        sync: false
 
 databases:
   - name: ceravox-db

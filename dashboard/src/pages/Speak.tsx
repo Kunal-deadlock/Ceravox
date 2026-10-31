@@ -10,6 +10,7 @@ export function Speak() {
   const [audio, setAudio] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [browserSpeaking, setBrowserSpeaking] = useState(false);
   const audioRef = useRef("");
 
   useEffect(() => {
@@ -20,15 +21,27 @@ export function Speak() {
         setLimit(models.limits.text_chars);
         if (models.kokoro && models.kokoro.available === false) {
           setTtsAvailable(false);
-          setError("Local TTS engine is not configured on this host. Speech generation requires running Ceravox locally with Kokoro-82M.");
         }
       })
       .catch((reason: Error) => setError(reason.message));
 
     return () => {
       if (audioRef.current) URL.revokeObjectURL(audioRef.current);
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
     };
   }, []);
+
+  const speakBrowser = () => {
+    if (!text.trim() || typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    setBrowserSpeaking(true);
+    utterance.onend = () => setBrowserSpeaking(false);
+    utterance.onerror = () => setBrowserSpeaking(false);
+    window.speechSynthesis.speak(utterance);
+  };
 
   const submit = () => {
     if (!text.trim() || text.length > limit || !voice || !ttsAvailable) return;
@@ -67,8 +80,19 @@ export function Speak() {
         <div className="status-card" style={{ marginTop: "12px", borderLeft: "4px solid #f59e0b" }}>
           <strong>Local Text-to-Speech (TTS) not connected</strong>
           <p className="muted" style={{ margin: "4px 0 0", fontSize: "0.85rem" }}>
-            Speech generation requires running Ceravox locally with Kokoro-82M.
+            Neural speech generation requires running Ceravox locally with Kokoro-82M. You can still speak text instantly in your browser below.
           </p>
+          <div style={{ marginTop: "8px" }}>
+            <button
+              type="button"
+              className="button-secondary"
+              disabled={!text.trim() || browserSpeaking}
+              onClick={speakBrowser}
+              style={{ fontSize: "0.85rem", padding: "6px 12px" }}
+            >
+              {browserSpeaking ? "Speaking in browser…" : "🔊 Speak with browser audio"}
+            </button>
+          </div>
         </div>
       )}
 
@@ -79,7 +103,6 @@ export function Speak() {
           rows={5}
           value={text}
           maxLength={limit}
-          disabled={!ttsAvailable}
           onChange={(event) => setText(event.target.value)}
           placeholder="Type or paste text to synthesize into spoken audio..."
         />

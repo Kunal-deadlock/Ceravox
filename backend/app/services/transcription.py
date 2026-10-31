@@ -21,13 +21,23 @@ def transcribe(
             temporary_audio(runtime.settings.audio_storage_dir) as (identifier, path),
         ):
             samples = normalize(file, mime, path, runtime.settings)
-            result = runtime.load_asr().transcribe(samples)
+            duration = len(samples) / 16000
+
+            if runtime.settings.groq_api_key.strip():
+                from app.adapters.groq_adapter import GroqAdapter
+
+                source_bytes = (path / "source").read_bytes()
+                adapter = GroqAdapter(runtime.settings)
+                result = adapter.transcribe_bytes(source_bytes, filename="audio.wav")
+            else:
+                result = runtime.load_asr().transcribe(samples)
+
             record = Transcript(
                 user_id=owner,
                 storage_id=identifier,
                 text=result.text,
                 language=result.language,
-                duration=len(samples) / 16000,
+                duration=duration,
             )
             record.segments = [
                 TranscriptSegment(position=index, start_ms=s.start_ms, end_ms=s.end_ms, text=s.text)
@@ -43,4 +53,4 @@ def transcribe(
         raise
     except Exception:
         db.rollback()
-        raise voice_error(500, "transcription_failed", "Local transcription failed") from None
+        raise voice_error(500, "transcription_failed", "Transcription failed") from None

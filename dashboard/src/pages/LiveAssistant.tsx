@@ -39,6 +39,16 @@ export function LiveAssistant() {
   }, [messages, statusMessage]);
 
   useEffect(() => {
+    void getModels()
+      .then((models) => {
+        if (models.ollama && models.ollama.available === false) {
+          setAssistantAvailable(false);
+        }
+      })
+      .catch(() => {
+        /* ignore */
+      });
+
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       if (recorderRef.current?.isRecording()) {

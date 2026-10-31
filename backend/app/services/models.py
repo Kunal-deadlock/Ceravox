@@ -87,7 +87,23 @@ class ModelService:
                 status.available = True
             return status
 
-        asr = state("asr", s.asr_model, ["faster_whisper", "ctranslate2"], asr_assets)
+        if s.groq_api_key.strip():
+            asr = ModelStatus(
+                model=s.groq_asr_model,
+                configured=True,
+                available=True,
+                status="available",
+            )
+            ollama_status = ModelStatus(
+                model=s.groq_model,
+                configured=True,
+                available=True,
+                status="available",
+            )
+        else:
+            asr = state("asr", s.asr_model, ["faster_whisper", "ctranslate2"], asr_assets)
+            ollama_status = _probe_ollama(s)
+
         tts = state(
             "tts",
             s.tts_model,
@@ -96,10 +112,11 @@ class ModelService:
         )
         tts.voices = voices
         tts.default_voice = s.tts_default_voice if s.tts_default_voice in voices else None
+
         return ModelsResponse(
             faster_whisper=asr,
             kokoro=tts,
-            ollama=_probe_ollama(s),
+            ollama=ollama_status,
             limits=VoiceLimits(
                 upload_bytes=s.audio_max_upload_bytes,
                 text_chars=s.tts_max_text_chars,

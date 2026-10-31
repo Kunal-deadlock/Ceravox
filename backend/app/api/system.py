@@ -43,8 +43,11 @@ def _check_db(db: Session) -> ComponentInfo:
 
 
 def _check_ollama() -> ComponentInfo:
-    """Probe Ollama /api/tags — lightweight, no inference, no model required."""
+    """Probe Groq or Ollama — lightweight, no inference, no model required."""
     settings = get_settings()
+    if settings.groq_api_key.strip():
+        return ComponentInfo(status="ready", reason="")
+
     url = f"{settings.ollama_url.rstrip('/')}/api/tags"
     try:
         with urlopen(url, timeout=3):  # noqa: S310 — local 127.0.0.1 only

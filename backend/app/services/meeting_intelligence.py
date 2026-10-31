@@ -1,4 +1,4 @@
-"""Bounded transcript-in-context requests to a local Ollama instance."""
+"""Bounded transcript-in-context requests to Groq (cloud) or local Ollama."""
 
 import json
 from urllib.error import HTTPError, URLError
@@ -20,7 +20,12 @@ class OllamaMalformedResponse(Exception):
 
 
 def generate(prompt: str, settings: Settings) -> str:
-    """Request a non-streaming completion from the configured local model."""
+    """Request a non-streaming completion from Groq (if configured) or local Ollama."""
+    if settings.groq_api_key.strip():
+        from app.adapters.groq_adapter import GroqAdapter
+
+        return GroqAdapter(settings).generate(prompt)
+
     payload = json.dumps(
         {
             "model": settings.ollama_model,
