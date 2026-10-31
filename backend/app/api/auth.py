@@ -89,13 +89,14 @@ async def register(payload: Credentials, db: Db, response: Response) -> UserResp
     except AuthServiceError as error:
         raise auth_error(error) from error
     settings = get_settings()
+    samesite = "none" if settings.cookie_secure else "lax"
     response.set_cookie(
         SESSION_COOKIE,
         raw_token,
         max_age=settings.session_ttl_seconds,
         httponly=True,
         secure=settings.cookie_secure,
-        samesite="lax",
+        samesite=samesite,
         path="/",
     )
     return safe_user(user)
@@ -110,13 +111,14 @@ async def login(payload: Credentials, db: Db, response: Response) -> UserRespons
             await asyncio.sleep(get_settings().login_failure_delay_seconds)
         raise auth_error(error) from error
     settings = get_settings()
+    samesite = "none" if settings.cookie_secure else "lax"
     response.set_cookie(
         SESSION_COOKIE,
         raw_token,
         max_age=settings.session_ttl_seconds,
         httponly=True,
         secure=settings.cookie_secure,
-        samesite="lax",
+        samesite=samesite,
         path="/",
     )
     return safe_user(user)
@@ -128,9 +130,13 @@ async def login(payload: Credentials, db: Db, response: Response) -> UserRespons
     dependencies=[Depends(require_csrf)],
 )
 def logout(request: Request, response: Response, db: Db, _: CurrentUser) -> None:
+    settings = get_settings()
+    samesite = "none" if settings.cookie_secure else "lax"
     service().logout(db, request.cookies.get(SESSION_COOKIE))
-    response.delete_cookie(SESSION_COOKIE, path="/")
-    response.delete_cookie(CSRF_COOKIE, path="/")
+    response.delete_cookie(
+        SESSION_COOKIE, path="/", samesite=samesite, secure=settings.cookie_secure
+    )
+    response.delete_cookie(CSRF_COOKIE, path="/", samesite=samesite, secure=settings.cookie_secure)
 
 
 @router.get("/auth/me")

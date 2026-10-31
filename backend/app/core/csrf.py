@@ -22,7 +22,7 @@ def set_csrf_cookie(response: Response, token: str) -> None:
         max_age=settings.session_ttl_seconds,
         httponly=False,
         secure=settings.cookie_secure,
-        samesite="lax",
+        samesite="none" if settings.cookie_secure else "lax",
         path="/",
     )
 

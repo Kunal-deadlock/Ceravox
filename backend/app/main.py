@@ -40,12 +40,17 @@ def create_app() -> FastAPI:
     settings = get_settings()
     application = FastAPI(title=settings.app_name, version="0.1.0", lifespan=lifespan)
     application.state.readiness_checks = {}
+
+    origins = {settings.dashboard_url.rstrip("/"), "http://127.0.0.1:5173", "http://localhost:5173"}
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=[settings.dashboard_url],
+        allow_origins=list(origins),
+        allow_origin_regex=r"https://.*\.vercel\.app"
+        if "vercel.app" in settings.dashboard_url
+        else None,
         allow_credentials=True,
-        allow_methods=["GET", "POST"],
-        allow_headers=["Content-Type", "X-CSRF-Token"],
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
     application.include_router(health_router)
     application.include_router(auth_router)
