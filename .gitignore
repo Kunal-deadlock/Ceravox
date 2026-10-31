@@ -48,6 +48,7 @@ transcripts/
 # IDE and OS files
 .idea/
 .vscode/
+scripts/*.exe
 *.swp
 .DS_Store
 Thumbs.db
