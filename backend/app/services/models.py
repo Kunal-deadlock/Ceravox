@@ -5,6 +5,8 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from threading import Lock
 from typing import Protocol
+from urllib.error import URLError
+from urllib.request import urlopen
 
 import numpy as np
 from numpy.typing import NDArray
@@ -22,6 +24,34 @@ class ASR(Protocol):
 
 class TTS(Protocol):
     def generate(self, text: str, voice: str) -> Iterator[NDArray[np.float32]]: ...
+
+
+def _probe_ollama(settings: Settings) -> ModelStatus:
+    """Probe the local Ollama daemon; never raises — returns a safe ModelStatus."""
+    url = f"{settings.ollama_url.rstrip('/')}/api/tags"
+    model = settings.ollama_model
+    try:
+        with urlopen(url, timeout=3):  # noqa: S310 — local loopback only
+            return ModelStatus(
+                model=model,
+                configured=True,
+                available=True,
+                status="available",
+            )
+    except (URLError, TimeoutError, OSError):
+        return ModelStatus(
+            model=model,
+            configured=True,
+            available=False,
+            status="missing_assets",
+        )
+    except Exception:  # noqa: BLE001
+        return ModelStatus(
+            model=model,
+            configured=True,
+            available=False,
+            status="missing_assets",
+        )
 
 
 class ModelService:
@@ -69,9 +99,7 @@ class ModelService:
         return ModelsResponse(
             faster_whisper=asr,
             kokoro=tts,
-            ollama=ModelStatus(
-                model=None, configured=False, available=False, status="not_configured"
-            ),
+            ollama=_probe_ollama(s),
             limits=VoiceLimits(
                 upload_bytes=s.audio_max_upload_bytes,
                 text_chars=s.tts_max_text_chars,

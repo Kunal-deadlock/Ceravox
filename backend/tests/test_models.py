@@ -12,7 +12,7 @@ def test_models_safe_missing_assets(voice_client):
     result = response.json()
     assert result["faster_whisper"]["model"] == "base"
     assert result["kokoro"]["model"] == "Kokoro-82M"
-    assert result["ollama"]["status"] == "not_configured"
+    assert result["ollama"]["status"] in ("available", "missing_assets")
     assert str(runtime.settings.asr_model_dir) not in response.text
     assert str(runtime.settings.tts_model_dir) not in response.text
     assert response.headers["cache-control"] == "no-store"
