@@ -1,0 +1,18 @@
+# Cloud deployment requirements (Render free tier).
+# Excludes local-only AI model dependencies (faster-whisper, kokoro, torch, etc.)
+# that cannot run in a 512 MB cloud container.
+# AI features (transcription, TTS, Ollama) will report "unavailable" when not installed.
+fastapi==0.115.6
+httpx==0.28.1
+SQLAlchemy==2.1.6
+alembic==1.14.1
+pwdlib==0.2.1
+argon2-cffi==23.1.0
+argon2-cffi-bindings==25.1.0
+pydantic==2.12.5
+pydantic-settings==2.7.1
+uvicorn[standard]==0.34.0
+psycopg2-binary==2.9.10
+python-multipart==0.0.32
+numpy==2.2.6
+av==16.0.1

@@ -1,11 +1,17 @@
 export function getApiBaseUrl(): string {
+  const envUrl = (import.meta.env.VITE_API_BASE_URL ?? "").trim().replace(/\/+$/, "");
   try {
     const saved = localStorage.getItem("ceravox_api_url");
     if (saved && saved.trim()) {
-      return saved.trim().replace(/\/+$/, "");
+      const clean = saved.trim().replace(/\/+$/, "");
+      if (clean.includes("trycloudflare.com") && envUrl && !envUrl.includes("trycloudflare.com")) {
+        localStorage.removeItem("ceravox_api_url");
+        return envUrl;
+      }
+      return clean;
     }
   } catch {}
-  return (import.meta.env.VITE_API_BASE_URL ?? "").trim().replace(/\/+$/, "");
+  return envUrl;
 }
 
 export function setApiBaseUrl(url: string): void {
@@ -36,4 +42,3 @@ export function setAuthToken(token: string | null): void {
     }
   } catch {}
 }
-

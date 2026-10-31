@@ -44,6 +44,12 @@ class Settings(BaseSettings):
     tts_max_audio_seconds: int = Field(default=300, ge=1, le=600)
 
     @model_validator(mode="after")
+    def validate_database_url(self) -> Self:
+        if self.database_url.startswith("postgres://"):
+            self.database_url = self.database_url.replace("postgres://", "postgresql://", 1)
+        return self
+
+    @model_validator(mode="after")
     def validate_voice_settings(self) -> Self:
         import re
 

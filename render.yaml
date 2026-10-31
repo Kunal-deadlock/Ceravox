@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: ceravox-api
+    runtime: python
+    plan: free
+    branch: main
+    buildCommand: pip install -r backend/requirements-cloud.txt
+    startCommand: cd backend && python -m alembic upgrade head && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: CERAVOX_ENVIRONMENT
+        value: production
+      - key: CERAVOX_DASHBOARD_URL
+        value: https://ceravox-nova.vercel.app
+      - key: CERAVOX_COOKIE_SECURE
+        value: "true"
+      - key: CERAVOX_DATABASE_URL
+        fromDatabase:
+          name: ceravox-db
+          property: connectionString
+
+databases:
+  - name: ceravox-db
+    plan: free

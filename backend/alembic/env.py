@@ -18,6 +18,8 @@ config = context.config
 if config.get_main_option("sqlalchemy.url") == "sqlite:///./ceravox.db":
     url = os.environ.get("CERAVOX_DATABASE_URL")
     if url:
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql://", 1)
         config.set_main_option("sqlalchemy.url", url.replace("%", "%%"))
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
