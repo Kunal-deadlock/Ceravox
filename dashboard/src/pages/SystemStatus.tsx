@@ -11,8 +11,7 @@ const COMPONENT_LABELS: Record<string, string> = {
 
 function statusClass(status: ComponentStatus): string {
   if (status === "ready") return "status-pill status-ready";
-  if (status === "degraded") return "status-pill status-pending";
-  return "status-pill status-error";
+  return "status-pill status-pending";
 }
 
 export function SystemStatus() {
@@ -79,7 +78,7 @@ export function SystemStatus() {
               <p className="muted">
                 {data.overall === "ready"
                   ? "All required components are ready for local offline voice workflows."
-                  : "Some components are not ready. Workflows requiring those components may fail."}
+                  : "Hosted account and database services are active. Voice AI inference requires running the local Ceravox workstation."}
               </p>
             </div>
             <span className={statusClass(data.overall)}>{data.overall}</span>

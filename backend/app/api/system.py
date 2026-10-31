@@ -50,15 +50,9 @@ def _check_ollama() -> ComponentInfo:
         with urlopen(url, timeout=3):  # noqa: S310 — local 127.0.0.1 only
             return ComponentInfo(status="ready", reason="")
     except URLError:
-        if settings.environment == "production":
-            reason = (
-                "Local Ollama is not configured on this host "
-                "(run Ceravox locally for LLM features)."
-            )
-        else:
-            reason = (
-                f"Local Ollama is not reachable. Start Ollama and pull {settings.ollama_model}."
-            )
+        reason = (
+            "Local Ollama is not configured on this host (run Ceravox locally for LLM features)."
+        )
         return ComponentInfo(
             status="unavailable",
             reason=reason,
@@ -76,31 +70,20 @@ def _model_status_to_component(
     model_status_value: str, component_name: str = "model"
 ) -> ComponentInfo:
     """Map an existing ModelService status string to a safe ComponentInfo."""
-    settings = get_settings()
-    is_prod = settings.environment == "production"
-
     if model_status_value == "available":
         return ComponentInfo(status="ready", reason="")
     if model_status_value == "not_configured":
         return ComponentInfo(status="unavailable", reason="Model is not configured.")
     if model_status_value == "missing_dependency":
         reason = (
-            (
-                f"Local {component_name} engine is not installed on this host "
-                "(run Ceravox locally for voice features)."
-            )
-            if is_prod
-            else "A required Python package is not installed."
+            f"Local {component_name} engine is not installed on this host "
+            "(run Ceravox locally for voice features)."
         )
         return ComponentInfo(status="unavailable", reason=reason)
     if model_status_value == "missing_assets":
         reason = (
-            (
-                f"Local {component_name} weights are not installed on this host "
-                "(run Ceravox locally for voice features)."
-            )
-            if is_prod
-            else "Model files are not installed. Run the model installer."
+            f"Local {component_name} weights are not installed on this host "
+            "(run Ceravox locally for voice features)."
         )
         return ComponentInfo(status="unavailable", reason=reason)
     if model_status_value == "load_failed":
