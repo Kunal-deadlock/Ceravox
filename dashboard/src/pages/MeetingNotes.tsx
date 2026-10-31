@@ -13,6 +13,7 @@ export function MeetingNotes() {
   const [answer, setAnswer] = useState<MeetingResult | null>(null);
   const [audio, setAudio] = useState("");
   const [voice, setVoice] = useState("af_heart");
+  const [ollamaAvailable, setOllamaAvailable] = useState<boolean>(true);
   const [action, setAction] = useState<ActiveAction>(null);
   const [error, setError] = useState("");
 
@@ -23,7 +24,10 @@ export function MeetingNotes() {
       .then(([result, models]) => {
         setItems(result.items);
         if (result.items[0]) setSelected(result.items[0].id);
-        if (models.kokoro.default_voice) setVoice(models.kokoro.default_voice);
+        if (models.kokoro?.default_voice) setVoice(models.kokoro.default_voice);
+        if (models.ollama && models.ollama.available === false) {
+          setOllamaAvailable(false);
+        }
       })
       .catch((reason: Error) => setError(reason.message));
   }, []);
@@ -33,7 +37,7 @@ export function MeetingNotes() {
   }, [audio]);
 
   async function handleSummary() {
-    if (busy || !selected) return;
+    if (busy || !selected || !ollamaAvailable) return;
     setAction("summary");
     setError("");
     try {
@@ -47,7 +51,7 @@ export function MeetingNotes() {
   }
 
   async function handleQuestion() {
-    if (busy || !selected || !question.trim()) return;
+    if (busy || !selected || !question.trim() || !ollamaAvailable) return;
     setAction("question");
     setError("");
     try {
@@ -79,6 +83,15 @@ export function MeetingNotes() {
       <h2>Meeting Notes</h2>
       <p className="muted">Summaries and answers use your local Ollama model and saved transcript.</p>
 
+      {!ollamaAvailable && (
+        <div className="status-card" style={{ marginTop: "12px", borderLeft: "4px solid #f59e0b" }}>
+          <strong>Local LLM (Ollama) not connected</strong>
+          <p className="muted" style={{ margin: "4px 0 0", fontSize: "0.85rem" }}>
+            Summarization and Q&A require running Ceravox locally with Ollama (qwen2.5:3b).
+          </p>
+        </div>
+      )}
+
       <label htmlFor="meeting-transcript">Saved transcript</label>
       <select
         id="meeting-transcript"
@@ -104,8 +117,9 @@ export function MeetingNotes() {
 
       <button
         type="button"
-        disabled={!selected || busy}
+        disabled={!selected || busy || !ollamaAvailable}
         onClick={() => void handleSummary()}
+        title={!ollamaAvailable ? "Meeting notes require running Ceravox locally with Ollama" : undefined}
       >
         {action === "summary" ? "Generating summary…" : "Generate summary and action items"}
       </button>
@@ -150,15 +164,16 @@ export function MeetingNotes() {
         rows={3}
         maxLength={2000}
         value={question}
-        disabled={busy}
+        disabled={busy || !ollamaAvailable}
         onChange={(event) => setQuestion(event.target.value)}
         placeholder="What decisions were made?"
       />
 
       <button
         type="button"
-        disabled={!selected || !question.trim() || busy}
+        disabled={!selected || !question.trim() || busy || !ollamaAvailable}
         onClick={() => void handleQuestion()}
+        title={!ollamaAvailable ? "Transcript Q&A requires running Ceravox locally with Ollama" : undefined}
       >
         {action === "question" ? "Asking…" : "Ask locally"}
       </button>

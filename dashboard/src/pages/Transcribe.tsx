@@ -8,6 +8,7 @@ export function Transcribe() {
   const [result, setResult] = useState<Transcript | null>(null);
   const [items, setItems] = useState<Awaited<ReturnType<typeof listTranscripts>>["items"]>([]);
   const [limit, setLimit] = useState(26214400);
+  const [asrAvailable, setAsrAvailable] = useState<boolean>(true);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -16,6 +17,9 @@ export function Transcribe() {
       .then(([models, transcripts]) => {
         setLimit(models.limits.upload_bytes);
         setItems(transcripts.items);
+        if (models.faster_whisper && models.faster_whisper.available === false) {
+          setAsrAvailable(false);
+        }
       })
       .catch((reason: Error) => setError(reason.message));
   }, []);
@@ -31,7 +35,7 @@ export function Transcribe() {
   };
 
   const submit = () => {
-    if (!file) return;
+    if (!file || !asrAvailable) return;
     setBusy(true);
     setError("");
     void transcribeAudio(file)
@@ -68,12 +72,22 @@ export function Transcribe() {
         <span className="tech-pill">faster-whisper</span>
       </div>
 
+      {!asrAvailable && (
+        <div className="status-card" style={{ marginTop: "12px", borderLeft: "4px solid #f59e0b" }}>
+          <strong>Local Speech-to-Text (ASR) not connected</strong>
+          <p className="muted" style={{ margin: "4px 0 0", fontSize: "0.85rem" }}>
+            Audio transcription requires running Ceravox locally with faster-whisper. Existing saved transcripts remain viewable and exportable below.
+          </p>
+        </div>
+      )}
+
       <div style={{ marginTop: "8px" }}>
         <label htmlFor="audio-file">Audio file</label>
         <input
           id="audio-file"
           type="file"
           accept=".wav,.mp3,.m4a,.ogg,audio/*"
+          disabled={!asrAvailable}
           onChange={(event) => select(event.target.files?.[0] ?? null)}
         />
         {file && (
@@ -85,8 +99,9 @@ export function Transcribe() {
 
       <button
         type="button"
-        disabled={!file || busy}
+        disabled={!file || busy || !asrAvailable}
         onClick={submit}
+        title={!asrAvailable ? "Transcription requires running Ceravox locally with faster-whisper" : undefined}
         style={{ minWidth: "160px", alignSelf: "flex-start" }}
       >
         {busy ? "Transcribing…" : "Transcribe"}
@@ -120,10 +135,7 @@ export function Transcribe() {
             ))}
           </ol>
 
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "16px" }}>
-            <button type="button" className="button-secondary" onClick={() => void navigator.clipboard.writeText(result.text)}>
-              Copy
-            </button>
+          <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
             <button type="button" className="button-secondary" onClick={() => void download("md")}>
               Download MD
             </button>
@@ -137,38 +149,49 @@ export function Transcribe() {
         </article>
       )}
 
-      <aside style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid #e2e8f0" }}>
+      <div style={{ marginTop: "24px" }}>
         <h3>Saved transcripts</h3>
-        {items.length ? (
-          <ul style={{ listStyle: "none", padding: 0, margin: "12px 0 0", display: "grid", gap: "8px" }}>
+        {items.length === 0 ? (
+          <p className="muted" style={{ margin: "4px 0 0" }}>
+            No saved transcripts yet.
+          </p>
+        ) : (
+          <ul style={{ listStyle: "none", padding: 0, margin: "8px 0 0", display: "grid", gap: "8px" }}>
             {items.map((item) => (
-              <li key={item.id}>
+              <li
+                key={item.id}
+                style={{
+                  padding: "10px 14px",
+                  borderRadius: "6px",
+                  border: "1px solid #e2e8f0",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <strong>{new Date(item.created_at).toLocaleString()}</strong>
+                  <span className="muted" style={{ marginLeft: "10px", fontSize: "0.85rem" }}>
+                    {item.language ?? "Unknown"} · {item.duration.toFixed(2)}s
+                  </span>
+                </div>
                 <button
                   type="button"
-                  className="link-button"
-                  onClick={() => void getTranscript(item.id).then(setResult)}
-                  style={{
-                    padding: "8px 14px",
-                    borderRadius: "10px",
-                    background: "#f1f5f9",
-                    textDecoration: "none",
-                    color: "#0f172a",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "8px",
+                  className="button-secondary"
+                  style={{ padding: "4px 10px", fontSize: "0.8rem" }}
+                  onClick={() => {
+                    void getTranscript(item.id)
+                      .then(setResult)
+                      .catch((reason: Error) => setError(reason.message));
                   }}
                 >
-                  📄 {new Date(item.created_at).toLocaleString()}
+                  View
                 </button>
               </li>
             ))}
           </ul>
-        ) : (
-          <p className="muted" style={{ margin: "6px 0 0" }}>
-            No saved transcripts.
-          </p>
         )}
-      </aside>
+      </div>
     </section>
   );
 }

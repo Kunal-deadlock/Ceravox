@@ -48,6 +48,14 @@ export function SystemStatus() {
         </button>
       </div>
 
+      <div className="status-card" style={{ marginTop: "16px", marginBottom: "16px", borderLeft: "4px solid #3b82f6" }}>
+        <p className="card-label">DEPLOYMENT TOPOLOGY</p>
+        <h4 style={{ margin: "4px 0 6px" }}>Hosted Data Console & Local Hardware Inference</h4>
+        <p className="muted" style={{ margin: 0, fontSize: "0.85rem", lineHeight: 1.5 }}>
+          The cloud backend provides persistent PostgreSQL storage, session authentication, and transcript records. Voice transcription (faster-whisper), speech synthesis (Kokoro), and AI assistance (Ollama) run on your local machine with model weights installed.
+        </p>
+      </div>
+
       {error && (
         <div className="result-card" role="alert" style={{ marginTop: "1rem" }}>
           <p className="form-error">

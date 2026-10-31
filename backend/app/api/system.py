@@ -50,9 +50,18 @@ def _check_ollama() -> ComponentInfo:
         with urlopen(url, timeout=3):  # noqa: S310 — local 127.0.0.1 only
             return ComponentInfo(status="ready", reason="")
     except URLError:
+        if settings.environment == "production":
+            reason = (
+                "Local Ollama is not configured on this host "
+                "(run Ceravox locally for LLM features)."
+            )
+        else:
+            reason = (
+                f"Local Ollama is not reachable. Start Ollama and pull {settings.ollama_model}."
+            )
         return ComponentInfo(
             status="unavailable",
-            reason=f"Local Ollama is not reachable. Start Ollama and pull {settings.ollama_model}.",
+            reason=reason,
         )
     except TimeoutError:
         return ComponentInfo(
@@ -63,22 +72,37 @@ def _check_ollama() -> ComponentInfo:
         return ComponentInfo(status="unavailable", reason="Ollama check failed.")
 
 
-def _model_status_to_component(model_status_value: str) -> ComponentInfo:
+def _model_status_to_component(
+    model_status_value: str, component_name: str = "model"
+) -> ComponentInfo:
     """Map an existing ModelService status string to a safe ComponentInfo."""
+    settings = get_settings()
+    is_prod = settings.environment == "production"
+
     if model_status_value == "available":
         return ComponentInfo(status="ready", reason="")
     if model_status_value == "not_configured":
         return ComponentInfo(status="unavailable", reason="Model is not configured.")
     if model_status_value == "missing_dependency":
-        return ComponentInfo(
-            status="unavailable",
-            reason="A required Python package is not installed.",
+        reason = (
+            (
+                f"Local {component_name} engine is not installed on this host "
+                "(run Ceravox locally for voice features)."
+            )
+            if is_prod
+            else "A required Python package is not installed."
         )
+        return ComponentInfo(status="unavailable", reason=reason)
     if model_status_value == "missing_assets":
-        return ComponentInfo(
-            status="unavailable",
-            reason="Model files are not installed. Run the model installer.",
+        reason = (
+            (
+                f"Local {component_name} weights are not installed on this host "
+                "(run Ceravox locally for voice features)."
+            )
+            if is_prod
+            else "Model files are not installed. Run the model installer."
         )
+        return ComponentInfo(status="unavailable", reason=reason)
     if model_status_value == "load_failed":
         return ComponentInfo(
             status="degraded",
@@ -107,8 +131,8 @@ def system_status(
 
     components: dict[str, ComponentInfo] = {
         "db": _check_db(db),
-        "asr": _model_status_to_component(model_info.faster_whisper.status),
-        "tts": _model_status_to_component(model_info.kokoro.status),
+        "asr": _model_status_to_component(model_info.faster_whisper.status, "speech-to-text (ASR)"),
+        "tts": _model_status_to_component(model_info.kokoro.status, "text-to-speech (TTS)"),
         "ollama": _check_ollama(),
     }
 

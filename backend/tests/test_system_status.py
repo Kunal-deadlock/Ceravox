@@ -216,3 +216,21 @@ def test_tts_component_present_with_safe_status(voice_client) -> None:
     response = client.get("/api/system/status")
     tts = response.json()["components"]["tts"]
     assert tts["status"] in SAFE_STATUSES
+
+
+def test_system_status_production_truthful_messages(voice_client, monkeypatch) -> None:
+    """In production mode, unavailable services must explain local runtime requirement."""
+    client, _, _ = voice_client
+    from app.core.config import get_settings
+
+    monkeypatch.setattr(get_settings(), "environment", "production")
+
+    response = client.get("/api/system/status")
+    assert response.status_code == 200
+    body = response.json()
+
+    # If ollama is unavailable, reason must cite running locally, not starting a local daemon
+    ollama_info = body["components"]["ollama"]
+    if ollama_info["status"] == "unavailable":
+        assert "run Ceravox locally" in ollama_info["reason"]
+        assert "Start Ollama and pull" not in ollama_info["reason"]

@@ -1,7 +1,7 @@
 """Thin authentication and protected-shell routes."""
 
 import asyncio
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel
@@ -90,7 +90,7 @@ async def register(payload: Credentials, db: Db, response: Response) -> UserResp
     except AuthServiceError as error:
         raise auth_error(error) from error
     settings = get_settings()
-    samesite = "none" if settings.cookie_secure else "lax"
+    samesite: Literal["lax", "none"] = "none" if settings.cookie_secure else "lax"
     response.set_cookie(
         SESSION_COOKIE,
         raw_token,
@@ -112,7 +112,7 @@ async def login(payload: Credentials, db: Db, response: Response) -> UserRespons
             await asyncio.sleep(get_settings().login_failure_delay_seconds)
         raise auth_error(error) from error
     settings = get_settings()
-    samesite = "none" if settings.cookie_secure else "lax"
+    samesite: Literal["lax", "none"] = "none" if settings.cookie_secure else "lax"
     response.set_cookie(
         SESSION_COOKIE,
         raw_token,
@@ -132,14 +132,16 @@ async def login(payload: Credentials, db: Db, response: Response) -> UserRespons
 )
 def logout(request: Request, response: Response, db: Db, _: CurrentUser) -> None:
     settings = get_settings()
-    samesite = "none" if settings.cookie_secure else "lax"
+    samesite: Literal["lax", "none"] = "none" if settings.cookie_secure else "lax"
     raw_token = request.cookies.get(SESSION_COOKIE)
     if not raw_token:
         auth_header = request.headers.get("Authorization", "")
         if auth_header.startswith("Bearer "):
             raw_token = auth_header.removeprefix("Bearer ").strip()
     service().logout(db, raw_token)
-    response.delete_cookie(SESSION_COOKIE, path="/", samesite=samesite, secure=settings.cookie_secure)
+    response.delete_cookie(
+        SESSION_COOKIE, path="/", samesite=samesite, secure=settings.cookie_secure
+    )
     response.delete_cookie(CSRF_COOKIE, path="/", samesite=samesite, secure=settings.cookie_secure)
 
 

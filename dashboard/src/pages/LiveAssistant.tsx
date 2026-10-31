@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { askAssistant, generateSpeech, transcribeAudio } from "../lib/api";
+import { askAssistant, generateSpeech, transcribeAudio, getModels } from "../lib/api";
 import { AudioRecorder } from "../lib/audioRecorder";
 
 interface ChatMessage {
@@ -27,6 +27,7 @@ export function LiveAssistant() {
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [assistantAvailable, setAssistantAvailable] = useState(true);
 
   const recorderRef = useRef<AudioRecorder | null>(null);
   const timerRef = useRef<number | null>(null);
@@ -204,7 +205,7 @@ export function LiveAssistant() {
             />
             Auto-speak answers
           </label>
-          <button type="button" className="button-secondary" onClick={clearChat} disabled={busy || isRecording}>
+          <button type="button" className="button-secondary" onClick={clearChat} disabled={busy || isRecording || !assistantAvailable}>
             Clear
           </button>
         </div>
@@ -214,6 +215,15 @@ export function LiveAssistant() {
         <div className="result-card" role="alert" style={{ borderColor: "#fca5a5", background: "#fef2f2", margin: 0 }}>
           <p className="form-error" style={{ margin: 0 }}>
             {error}
+          </p>
+        </div>
+      )}
+
+      {!assistantAvailable && (
+        <div className="status-card" style={{ marginBottom: "16px", borderLeft: "4px solid #f59e0b" }}>
+          <strong>Local Voice AI not connected</strong>
+          <p className="muted" style={{ margin: "4px 0 0", fontSize: "0.85rem" }}>
+            The live assistant requires running Ceravox locally with Ollama (qwen2.5:3b) and Whisper. Real-time AI responses require your local runtime.
           </p>
         </div>
       )}
@@ -359,7 +369,7 @@ export function LiveAssistant() {
             <button
               type="button"
               onClick={startVoiceRecording}
-              disabled={busy}
+              disabled={busy || !assistantAvailable}
               style={{
                 minWidth: "200px",
                 background: "#0f172a",
@@ -383,7 +393,7 @@ export function LiveAssistant() {
                   void handleSendTextMessage("wispr-flow");
                 }
               }}
-              disabled={busy || isRecording}
+              disabled={busy || isRecording || !assistantAvailable}
               style={{ flex: 1, margin: 0, paddingRight: "140px" }}
             />
             <button
@@ -411,7 +421,7 @@ export function LiveAssistant() {
           <button
             type="button"
             onClick={() => void handleSendTextMessage("wispr-flow")}
-            disabled={busy || isRecording || !inputText.trim()}
+            disabled={busy || isRecording || !inputText.trim() || !assistantAvailable}
           >
             Send
           </button>

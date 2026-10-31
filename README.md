@@ -86,17 +86,22 @@ python scripts/check_offline.py --offline
 
 ---
 
+## Deployment Modes: Hosted Companion vs. Local AI Runtime
+
+Ceravox operates in two modes:
+
+### 1. Hosted Companion Console (Public)
+- **Frontend:** [https://ceravox-nova.vercel.app](https://ceravox-nova.vercel.app) (Vercel)
+- **Backend API & Database:** [https://ceravox-api.onrender.com](https://ceravox-api.onrender.com) (Render Web + PostgreSQL)
+- **Supported in Cloud:** User accounts, Argon2id session authentication, CSRF double-submit protection, persistent transcript storage, transcript viewing, and multi-format export (Markdown, Plain Text, JSON).
+- **Cloud Limitations:** Free zero-cost cloud containers cannot run heavy local inference weights. Voice transcription (faster-whisper), speech generation (Kokoro), and local LLM reasoning (Ollama) remain offline local capabilities and require the local runtime below.
+
+### 2. Full Local Workstation (Complete Offline AI)
+Running Ceravox locally executes all speech recognition, synthesis, and LLM reasoning on your machine's hardware with no cloud calls or external dependencies.
+
+---
+
 ## Run locally
-
-### Option 0: Live public demo (one-command — keeps Vercel live for all users)
-
-```powershell
-# First time only: copy .env.local.example → .env.local and add your Vercel token
-# (https://vercel.com/account/tokens)
-.\scripts\start.ps1
-```
-
-This starts the FastAPI backend, creates a Cloudflare tunnel, automatically updates the `VITE_API_BASE_URL` on Vercel, and triggers a redeploy — so **https://ceravox-nova.vercel.app is live for all users** within ~30 seconds. Keep the window open while demoing.
 
 ### Option 1: One-command local startup (Windows PowerShell)
 

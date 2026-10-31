@@ -6,6 +6,7 @@ export function Speak() {
   const [voices, setVoices] = useState<string[]>([]);
   const [voice, setVoice] = useState("");
   const [limit, setLimit] = useState(2000);
+  const [ttsAvailable, setTtsAvailable] = useState<boolean>(true);
   const [audio, setAudio] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -17,7 +18,10 @@ export function Speak() {
         setVoices(models.kokoro.voices ?? []);
         setVoice(models.kokoro.default_voice ?? models.kokoro.voices?.[0] ?? "");
         setLimit(models.limits.text_chars);
-        if (!models.kokoro.available) setError("Local TTS model is unavailable.");
+        if (models.kokoro && models.kokoro.available === false) {
+          setTtsAvailable(false);
+          setError("Local TTS engine is not configured on this host. Speech generation requires running Ceravox locally with Kokoro-82M.");
+        }
       })
       .catch((reason: Error) => setError(reason.message));
 
@@ -27,7 +31,7 @@ export function Speak() {
   }, []);
 
   const submit = () => {
-    if (!text.trim() || text.length > limit || !voice) return;
+    if (!text.trim() || text.length > limit || !voice || !ttsAvailable) return;
     setBusy(true);
     setError("");
     void generateSpeech(text, voice)
@@ -59,50 +63,37 @@ export function Speak() {
         </div>
       </div>
 
-      <div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-          <label htmlFor="speak-text" style={{ margin: 0 }}>Text to speak</label>
-          <button
-            type="button"
-            className="button-secondary"
-            onClick={() => {
-              const el = document.getElementById("speak-text");
-              el?.focus();
-            }}
-            style={{
-              padding: "4px 12px",
-              fontSize: "0.75rem",
-              borderRadius: "9999px",
-              background: "#f0f9ff",
-              borderColor: "#bae6fd",
-              color: "#0369a1",
-            }}
-            title="Focus textarea to dictate using your Wispr Flow desktop hotkey"
-          >
-            ✦ Dictate with Wispr Flow
-          </button>
+      {!ttsAvailable && (
+        <div className="status-card" style={{ marginTop: "12px", borderLeft: "4px solid #f59e0b" }}>
+          <strong>Local Text-to-Speech (TTS) not connected</strong>
+          <p className="muted" style={{ margin: "4px 0 0", fontSize: "0.85rem" }}>
+            Speech generation requires running Ceravox locally with Kokoro-82M.
+          </p>
         </div>
+      )}
+
+      <div style={{ marginTop: "8px" }}>
+        <label htmlFor="speak-text">Text to speak</label>
         <textarea
           id="speak-text"
-          rows={6}
-          placeholder="Enter text here or dictate hands-free with Wispr Flow to synthesize into speech..."
+          rows={5}
           value={text}
           maxLength={limit}
+          disabled={!ttsAvailable}
           onChange={(event) => setText(event.target.value)}
+          placeholder="Type or paste text to synthesize into spoken audio..."
         />
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
-          <span className="field-hint" style={{ margin: 0, fontSize: "0.8rem", color: "#64748b" }}>
-            💡 Press Wispr Flow hotkey while focused to speak your text.
-          </span>
-          <span className="field-hint" style={{ margin: 0 }}>
-            {text.length} / {limit} characters
+          <span className="field-hint">Max {limit} characters. English only.</span>
+          <span className="field-hint" style={{ color: text.length > limit * 0.9 ? "#ea580c" : undefined }}>
+            {text.length}/{limit}
           </span>
         </div>
       </div>
 
       <div>
         <label htmlFor="speak-voice">Voice</label>
-        <select id="speak-voice" value={voice} onChange={(event) => setVoice(event.target.value)}>
+        <select id="speak-voice" value={voice} disabled={!ttsAvailable} onChange={(event) => setVoice(event.target.value)}>
           {voices.map((item) => (
             <option key={item}>{item}</option>
           ))}
@@ -111,8 +102,9 @@ export function Speak() {
 
       <button
         type="button"
-        disabled={!text.trim() || text.length > limit || !voice || busy}
+        disabled={!text.trim() || text.length > limit || !voice || busy || !ttsAvailable}
         onClick={submit}
+        title={!ttsAvailable ? "Speech generation requires running Ceravox locally with Kokoro-82M" : undefined}
         style={{ minWidth: "180px", alignSelf: "flex-start" }}
       >
         {busy ? "Generating…" : "Generate speech"}
