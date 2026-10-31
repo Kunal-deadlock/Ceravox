@@ -34,7 +34,7 @@ describe("S1 authentication shell", () => {
 
     render(<App />);
 
-    expect(await screen.findByRole("heading", { name: "Log in to Ceravox" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "Welcome back" })).toBeTruthy();
   });
 
   it("renders first-run setup when no admin exists", async () => {
@@ -48,7 +48,7 @@ describe("S1 authentication shell", () => {
   it("renders the authenticated shell after login", async () => {
     api.getAuthStatus.mockResolvedValue({ setup_required: false });
     render(<App />);
-    await screen.findByRole("heading", { name: "Log in to Ceravox" });
+    await screen.findByRole("heading", { name: "Welcome back" });
 
     fireEvent.change(screen.getByLabelText("Email"), { target: { value: "admin@example.test" } });
     fireEvent.change(screen.getByLabelText("Password"), { target: { value: "Correct-Horse-7!" } });
@@ -66,7 +66,7 @@ describe("S1 authentication shell", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Log out" }));
 
-    await waitFor(() => expect(screen.getByRole("heading", { name: "Log in to Ceravox" })).toBeTruthy());
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Welcome back" })).toBeTruthy());
   });
 
   it("redirects to login after a 401 response", async () => {
@@ -75,6 +75,6 @@ describe("S1 authentication shell", () => {
 
     render(<App />);
 
-    expect(await screen.findByRole("heading", { name: "Log in to Ceravox" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "Welcome back" })).toBeTruthy();
   });
 });

@@ -16,6 +16,6 @@ describe("App", () => {
   it("renders the login heading", async () => {
     render(<App />);
 
-    expect(await screen.findByRole("heading", { name: "Log in to Ceravox" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "Welcome back" })).toBeTruthy();
   });
 });

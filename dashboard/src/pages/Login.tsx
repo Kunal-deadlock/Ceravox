@@ -67,12 +67,12 @@ export function Login({ onAuthenticated }: LoginProps) {
           </button>
         </div>
 
-        <p className="eyebrow">CERAVOX / {mode === "signup" ? "NEW ACCOUNT" : "LOCAL ACCESS"}</p>
-        <h1 id="login-title">{mode === "signup" ? "Create your Ceravox account" : "Log in to Ceravox"}</h1>
+        <p className="eyebrow">CERAVOX</p>
+        <h1 id="login-title">{mode === "signup" ? "Create an account" : "Welcome back"}</h1>
         <p className="muted">
           {mode === "signup"
-            ? "Create a local account on this machine. No cloud calls or accounts required."
-            : "Use your local account to access your private voice workstation."}
+            ? "Set up your Ceravox account to get started."
+            : "Sign in to continue to your workspace."}
         </p>
 
         <form onSubmit={submit}>
@@ -109,36 +109,17 @@ export function Login({ onAuthenticated }: LoginProps) {
           </button>
         </form>
 
-        <div style={{ marginTop: "16px", textAlign: "center" }}>
+
+        <div style={{ marginTop: "20px", textAlign: "right" }}>
           <button
             type="button"
             className="link-button"
-            onClick={() => {
-              setMode(mode === "login" ? "signup" : "login");
-              setError(null);
-            }}
-            style={{ fontSize: "0.85rem" }}
+            onClick={() => setShowConfig(!showConfig)}
+            style={{ fontSize: "0.75rem", color: "#6b7280" }}
+            aria-label="Configure backend URL"
           >
-            {mode === "login"
-              ? "Don't have an account? Sign up here"
-              : "Already have an account? Log in here"}
+            ⚙ {showConfig ? "Hide settings" : "Server settings"}
           </button>
-        </div>
-
-        <div style={{ marginTop: "20px", padding: "10px 14px", borderRadius: "8px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "0.75rem", color: "#9ca3af" }}>
-              Backend: <strong style={{ color: "#d1d5db" }}>{getApiBaseUrl() || "(same-origin)"}</strong>
-            </span>
-            <button
-              type="button"
-              className="link-button"
-              onClick={() => setShowConfig(!showConfig)}
-              style={{ fontSize: "0.75rem" }}
-            >
-              {showConfig ? "Close" : "Configure API"}
-            </button>
-          </div>
           {showConfig && (
             <div style={{ marginTop: "8px", display: "flex", gap: "6px" }}>
               <input
