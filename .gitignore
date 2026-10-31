@@ -27,6 +27,7 @@ opencode.jsonc
 .env
 .env.*
 !.env.example
+!.env.local.example
 .env.local
 *.pem
 *.key
