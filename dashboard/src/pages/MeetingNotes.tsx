@@ -123,7 +123,28 @@ export function MeetingNotes() {
         </article>
       )}
 
-      <label htmlFor="meeting-question">Ask about this transcript</label>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "1rem", marginBottom: "6px" }}>
+        <label htmlFor="meeting-question" style={{ margin: 0 }}>Ask about this transcript</label>
+        <button
+          type="button"
+          className="button-secondary"
+          onClick={() => {
+            const el = document.getElementById("meeting-question");
+            el?.focus();
+          }}
+          style={{
+            padding: "4px 12px",
+            fontSize: "0.75rem",
+            borderRadius: "9999px",
+            background: "#f0f9ff",
+            borderColor: "#bae6fd",
+            color: "#0369a1",
+          }}
+          title="Focus question input to dictate using your Wispr Flow desktop hotkey"
+        >
+          ✦ Dictate with Wispr Flow
+        </button>
+      </div>
       <textarea
         id="meeting-question"
         rows={3}

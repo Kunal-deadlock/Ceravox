@@ -1312,3 +1312,59 @@ Replaced the "Coming in a later milestone" placeholder on the Live Assistant pag
    - Frontend tests: `29 passed` across 9 test suites.
    - Frontend production build: `tsc -b && vite build` passed.
    - Docker Compose: `docker-compose config -q` passed.
+
+
+---
+
+## 2026-10-31 — MachinaFusion Futuristic UI/UX Overhaul & Animation Architecture
+
+### Scope and goals
+Transformed the entire frontend visual language to mirror the high-end futuristic "MachinaFusion" AI workstation aesthetic (inspired by Pinterest reference `https://pin.it/3sHgZ3QWc`). Created an ultra-clean floating porcelain workstation shell on warm titanium stone canvas, signature black-pill dock navigation with luminous pulsing indicators, a central radiant aura hero stage with human-AI vocal synapse visual, animated equalizer soundwave bars, tactile button physics, and silky 60fps micro-animations.
+
+### Changes made
+1. **Design System & Tokens (`dashboard/src/styles.css`):**
+   - Palette migration to titanium stone canvas (`--bg-canvas: #e5e9ef` with subtle radial lighting) and pure floating porcelain cards (`--bg-shell: #ffffff`, `--bg-card: #ffffff`, `--border-card: rgba(15, 23, 42, 0.09)`).
+   - High-definition typography hierarchy with obsidian display titles (`#0f172a`), refined slate copy (`#475569`), and custom-themed scrollbars and text selection.
+   - Ambient studio lighting: Floating organic background auras that breathe smoothly (`@keyframes floatAuraSlow`).
+2. **Pill Navigation Dock (`dashboard/src/pages/Dashboard.tsx`):**
+   - Recreated top navigation dock as an enclosed frosted pill container (`border-radius: 9999px; backdrop-filter: blur(8px)`).
+   - Active route displays as the signature obsidian black pill capsule (`background: #0f172a; color: #ffffff`) with an animated glowing white pulse dot (`•`).
+   - Integrated brand mark glyph and account pill cluster with offline status badge (`❖ Offline Stack`).
+3. **Hero Stage (`dashboard/src/components/HomeView.tsx`):**
+   - Central glowing ambient light orb (`.hero-aura`) with gentle breathing keyframe animation (`@keyframes auraBreath`).
+   - Handcrafted SVG visual showing human vocal frequency harmonics synthesizing into artificial neural synapses.
+   - Large display headline `Ceravox Neural` with translucent gradient mask subtitle `Intelligence that feels natural.`.
+   - Footer metadata row with model pill badges (`[faster-whisper]`, `[Kokoro-82M]`, `[Qwen2.5:3b]`, `[100% Offline]`).
+   - Quick launch workstation action cards with interactive animated equalizer bars that bounce on hover.
+4. **Interactive Feature Pages Polished (`LiveAssistant.tsx`, `Speak.tsx`, `Transcribe.tsx`):**
+   - Live Assistant: Modern message bubbles with distinct radii, mic button with concentric ripple ring animation (`@keyframes ripplePulse`), and live audio equalizer waves.
+   - Speak: Refined character counter badge, voice selector dropdown, and porcelain result card with custom audio controls.
+   - Transcribe: File dropzone, segment timeline chips with duration badges, and export pill buttons.
+5. **Full Verification Suite:**
+   - Frontend tests: `29 passed` across 9 test suites in 2.95s.
+   - Frontend typecheck: `tsc --noEmit` passed.
+   - Frontend linter: `eslint .` passed with 0 errors.
+   - Frontend build: `vite build` completed in 1.52s.
+   - Backend tests: `87 passed, 2 skipped` in 14.86s.
+   - Backend linter & formatter: `ruff check` and `ruff format` clean.
+   - Backend typechecker: `mypy app` clean (36 source files).
+
+
+---
+
+## 2026-10-31 — Izwi AI (izwiai.com) Enterprise Voice Architecture Design Pass
+
+### Scope and goals
+Adapted the frontend theme to align directly with `izwiai.com` (Enterprise Private Voice & Language AI Infrastructure), combining deep carbon obsidian surfaces (`#090a0b`), electric orange brand accents (`#f97316`), Space Grotesk / IBM Plex typography, fine 1px tech borders, and terminal-style telemetry cards while preserving 100% offline local runtime execution.
+
+### Changes made
+1. **Design System & Typography (`dashboard/src/styles.css` & `dashboard/index.html`):**
+   - Integrated Google Fonts: `Space Grotesk` (display headings), `IBM Plex Sans` (body and UI), and `IBM Plex Mono` (telemetry, tech pills, and code).
+   - Theme variables: `--bg-app: #090a0b`, `--bg-card: #101214`, `--accent-primary: #f97316` with ambient glow shadows.
+2. **Hero Presentation (`dashboard/src/components/HomeView.tsx`):**
+   - Modeled hero on Izwi's private infrastructure banner: `Run private voice and language AI inside your machine.`.
+   - Architectural specs: Data boundary guarantee, CPU-optimized inference, and model telemetry tags.
+3. **Verification:**
+   - Vitest: 29 passed across 9 suites (2.47s).
+   - Backend pytest: 87 passed, 2 skipped (11.30s).
+   - Typecheck, ESLint, and production build clean.

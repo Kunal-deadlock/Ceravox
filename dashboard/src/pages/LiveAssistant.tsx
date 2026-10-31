@@ -8,6 +8,7 @@ interface ChatMessage {
   text: string;
   audioUrl?: string;
   timestamp: string;
+  source?: "wispr-flow" | "mic-whisper";
 }
 
 export function LiveAssistant() {
@@ -15,7 +16,7 @@ export function LiveAssistant() {
     {
       id: "welcome-1",
       sender: "assistant",
-      text: "Hello! I am Ceravox, your local voice AI assistant. Tap 'Start Speaking' or type below to chat offline.",
+      text: "Hello! I am Ceravox, your local voice AI assistant. Tap 'Speak to Assistant' for offline mic recording, or dictate hands-free with Wispr Flow below.",
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     },
   ]);
@@ -30,6 +31,7 @@ export function LiveAssistant() {
   const recorderRef = useRef<AudioRecorder | null>(null);
   const timerRef = useRef<number | null>(null);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -44,11 +46,11 @@ export function LiveAssistant() {
     };
   }, []);
 
-  const handleSendTextMessage = async () => {
+  const handleSendTextMessage = async (source: "wispr-flow" | "mic-whisper" = "wispr-flow") => {
     const text = inputText.trim();
     if (!text || busy) return;
     setInputText("");
-    await processUserMessage(text);
+    await processUserMessage(text, source);
   };
 
   const startVoiceRecording = async () => {
@@ -98,7 +100,7 @@ export function LiveAssistant() {
         return;
       }
 
-      await processUserMessage(transcription.text.trim());
+      await processUserMessage(transcription.text.trim(), "mic-whisper");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Transcription failed";
       setError(`Voice transcription error: ${msg}`);
@@ -107,7 +109,7 @@ export function LiveAssistant() {
     }
   };
 
-  const processUserMessage = async (userText: string) => {
+  const processUserMessage = async (userText: string, source: "wispr-flow" | "mic-whisper" = "wispr-flow") => {
     setError(null);
     setBusy(true);
 
@@ -115,6 +117,7 @@ export function LiveAssistant() {
       id: `user-${Date.now()}`,
       sender: "user",
       text: userText,
+      source,
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
@@ -130,11 +133,8 @@ export function LiveAssistant() {
         try {
           const speechBlob = await generateSpeech(reply, "af_heart");
           audioUrl = URL.createObjectURL(speechBlob);
-          // Play audio response automatically
           const audio = new Audio(audioUrl);
-          void audio.play().catch(() => {
-            // Autoplay may be blocked by browser policy until user interacts
-          });
+          void audio.play().catch(() => {});
         } catch {
           // Fallback: speech synthesis failed, but text response still valid
         }
@@ -171,19 +171,36 @@ export function LiveAssistant() {
   };
 
   return (
-    <section className="voice-card" style={{ maxWidth: "880px" }} aria-label="Live Assistant">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <section className="voice-card" style={{ maxWidth: "920px" }} aria-label="Live Assistant">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
         <div>
           <h2>Live Assistant</h2>
-          <p className="muted">Offline voice interaction powered by faster-whisper, Qwen2.5, and Kokoro.</p>
+          <p className="muted" style={{ margin: 0 }}>
+            Offline voice interaction powered by faster-whisper, Qwen2.5, and Kokoro.
+          </p>
         </div>
-        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-          <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.85rem", cursor: "pointer", color: "var(--text-secondary)" }}>
+        <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              fontSize: "0.86rem",
+              fontWeight: 500,
+              cursor: "pointer",
+              color: "#475569",
+              margin: 0,
+              padding: "6px 12px",
+              borderRadius: "9999px",
+              background: "#f1f5f9",
+              border: "1px solid #e2e8f0",
+            }}
+          >
             <input
               type="checkbox"
               checked={autoSpeak}
               onChange={(e) => setAutoSpeak(e.target.checked)}
-              style={{ width: "auto", margin: 0 }}
+              style={{ width: "auto", margin: 0, cursor: "pointer" }}
             />
             Auto-speak answers
           </label>
@@ -194,7 +211,7 @@ export function LiveAssistant() {
       </div>
 
       {error && (
-        <div className="result-card" role="alert" style={{ borderColor: "rgba(239, 68, 68, 0.4)", background: "rgba(239, 68, 68, 0.08)" }}>
+        <div className="result-card" role="alert" style={{ borderColor: "#fca5a5", background: "#fef2f2", margin: 0 }}>
           <p className="form-error" style={{ margin: 0 }}>
             {error}
           </p>
@@ -206,14 +223,14 @@ export function LiveAssistant() {
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "14px",
-          minHeight: "320px",
-          maxHeight: "440px",
+          gap: "16px",
+          minHeight: "360px",
+          maxHeight: "480px",
           overflowY: "auto",
-          padding: "16px",
-          borderRadius: "12px",
-          background: "var(--bg-input)",
-          border: "1px solid var(--border-card)",
+          padding: "24px",
+          borderRadius: "20px",
+          background: "#f8fafc",
+          border: "1px solid #e2e8f0",
         }}
       >
         {messages.map((m) => (
@@ -223,25 +240,56 @@ export function LiveAssistant() {
               display: "flex",
               flexDirection: "column",
               alignSelf: m.sender === "user" ? "flex-end" : "flex-start",
-              maxWidth: "80%",
+              maxWidth: "82%",
+              animation: "fadeInUp 0.25s ease-out forwards",
             }}
           >
             <div
               style={{
-                padding: "12px 16px",
-                borderRadius: m.sender === "user" ? "14px 14px 2px 14px" : "14px 14px 14px 2px",
-                background:
-                  m.sender === "user"
-                    ? "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)"
-                    : "var(--bg-card-subtle)",
-                color: "#f8fafc",
-                border: m.sender === "assistant" ? "1px solid var(--border-subtle)" : "none",
-                lineHeight: "1.5",
+                padding: "14px 18px",
+                borderRadius: m.sender === "user" ? "20px 20px 4px 20px" : "20px 20px 20px 4px",
+                background: m.sender === "user" ? "#0f172a" : "#ffffff",
+                color: m.sender === "user" ? "#ffffff" : "#0f172a",
+                border: m.sender === "assistant" ? "1px solid #e2e8f0" : "none",
+                boxShadow: m.sender === "assistant" ? "0 2px 8px rgba(0,0,0,0.03)" : "0 4px 12px rgba(15, 23, 42, 0.15)",
+                lineHeight: "1.55",
               }}
             >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", marginBottom: "4px" }}>
+                {m.source === "wispr-flow" && (
+                  <span
+                    style={{
+                      fontSize: "0.68rem",
+                      fontWeight: 600,
+                      padding: "2px 8px",
+                      borderRadius: "9999px",
+                      background: "rgba(56, 189, 248, 0.2)",
+                      color: "#38bdf8",
+                      border: "1px solid rgba(56, 189, 248, 0.4)",
+                    }}
+                  >
+                    ✦ Dictated with Wispr Flow
+                  </span>
+                )}
+                {m.source === "mic-whisper" && (
+                  <span
+                    style={{
+                      fontSize: "0.68rem",
+                      fontWeight: 600,
+                      padding: "2px 8px",
+                      borderRadius: "9999px",
+                      background: "rgba(16, 185, 129, 0.2)",
+                      color: "#34d399",
+                      border: "1px solid rgba(52, 211, 153, 0.4)",
+                    }}
+                  >
+                    🎙️ Mic · faster-whisper
+                  </span>
+                )}
+              </div>
               <p style={{ margin: 0, fontSize: "0.95rem" }}>{m.text}</p>
               {m.audioUrl && (
-                <div style={{ marginTop: "10px" }}>
+                <div style={{ marginTop: "12px" }}>
                   <audio controls src={m.audioUrl} style={{ width: "100%", height: "36px" }}>
                     Your browser does not support audio playback.
                   </audio>
@@ -251,8 +299,9 @@ export function LiveAssistant() {
             <span
               style={{
                 fontSize: "0.72rem",
-                color: "var(--text-muted)",
+                color: "#94a3b8",
                 marginTop: "4px",
+                padding: "0 4px",
                 alignSelf: m.sender === "user" ? "flex-end" : "flex-start",
               }}
             >
@@ -262,26 +311,46 @@ export function LiveAssistant() {
         ))}
 
         {statusMessage && (
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#38bdf8", fontSize: "0.88rem" }}>
-            <span style={{ display: "inline-block", width: "8px", height: "8px", borderRadius: "50%", background: "#38bdf8", animation: "pulse 1.5s infinite" }} />
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "10px",
+              color: "#0f172a",
+              fontSize: "0.88rem",
+              fontWeight: 500,
+              padding: "8px 16px",
+              borderRadius: "9999px",
+              background: "#ffffff",
+              border: "1px solid #e2e8f0",
+              alignSelf: "flex-start",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+            }}
+          >
+            <div className="soundwave-bars" aria-hidden="true">
+              <span className="soundwave-bar" />
+              <span className="soundwave-bar" />
+              <span className="soundwave-bar" />
+            </div>
             {statusMessage}
           </div>
         )}
         <div ref={chatEndRef} />
       </div>
 
-      {/* Voice and Text Input Area */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+      {/* Voice and Text Input Area with Wispr Flow integration */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
           {isRecording ? (
             <button
               type="button"
               onClick={stopVoiceRecording}
               style={{
-                background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+                background: "#dc2626",
                 color: "#ffffff",
-                padding: "12px 20px",
-                minWidth: "180px",
+                padding: "12px 22px",
+                minWidth: "200px",
+                animation: "ripplePulse 1.5s infinite",
               }}
             >
               ⏹ Stop & Send ({recordingSeconds}s)
@@ -292,38 +361,66 @@ export function LiveAssistant() {
               onClick={startVoiceRecording}
               disabled={busy}
               style={{
-                minWidth: "180px",
+                minWidth: "200px",
+                background: "#0f172a",
               }}
             >
               🎙️ Speak to Assistant
             </button>
           )}
 
-          <input
-            type="text"
-            placeholder={isRecording ? "Recording audio..." : "Or type a message to the assistant..."}
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                void handleSendTextMessage();
-              }
-            }}
-            disabled={busy || isRecording}
-            style={{ flex: 1, margin: 0 }}
-          />
+          <div style={{ flex: 1, display: "flex", position: "relative", minWidth: "240px" }}>
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder={isRecording ? "Recording voice audio..." : "Type a message or dictate with Wispr Flow hotkey..."}
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              onInput={(e) => setInputText((e.target as HTMLInputElement).value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  void handleSendTextMessage("wispr-flow");
+                }
+              }}
+              disabled={busy || isRecording}
+              style={{ flex: 1, margin: 0, paddingRight: "140px" }}
+            />
+            <button
+              type="button"
+              className="button-secondary"
+              onClick={() => inputRef.current?.focus()}
+              title="Click to focus and press Wispr Flow desktop hotkey"
+              style={{
+                position: "absolute",
+                right: "6px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                padding: "4px 10px",
+                fontSize: "0.75rem",
+                borderRadius: "9999px",
+                background: "#f0f9ff",
+                borderColor: "#bae6fd",
+                color: "#0369a1",
+              }}
+            >
+              ✦ Wispr Flow
+            </button>
+          </div>
 
           <button
             type="button"
-            onClick={handleSendTextMessage}
+            onClick={() => void handleSendTextMessage("wispr-flow")}
             disabled={busy || isRecording || !inputText.trim()}
           >
             Send
           </button>
         </div>
+
+        <p className="field-hint" style={{ margin: "2px 0 0", fontSize: "0.82rem", color: "#64748b" }}>
+          💡 <strong>Wispr Flow Pro Dictation:</strong> Focus the input and press your Wispr Flow desktop hotkey to dictate hands-free.
+        </p>
       </div>
     </section>
   );
 }
-
