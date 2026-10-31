@@ -47,3 +47,4 @@ Write-Host "Press Ctrl+C to close the tunnel." -ForegroundColor Gray
 Write-Host ""
 
 & $binPath tunnel --url http://127.0.0.1:5173
+
