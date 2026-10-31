@@ -1,5 +1,7 @@
 # Ceravox
 
+**🔴 Live Demo:** [https://ceravox-nova.vercel.app](https://ceravox-nova.vercel.app)
+
 Ceravox is a local-first voice AI workstation for turning speech into useful work: transcripts, meeting notes, action items, and spoken answers. Built with privacy and accessibility in mind, all audio decoding, speech-to-text, reasoning, and speech synthesis are executed on your local machine.
 
 ---

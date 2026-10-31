@@ -38,3 +38,4 @@ weights, and secrets out of this file and out of Wispr Flow.
 | 2026-10-31 | Auth & Registration | Added local account registration flow alongside sign in | Added `POST /v1/auth/register`, tabbed Sign In / Create Account UI in Login page, Argon2id hashing, and session management; verified with 88 backend and 29 dashboard tests |
 | 2026-10-31 | Documentation Sync | Updated feature documentation in README | Documented Live Voice Assistant and local authentication/registration capabilities |
 | 2026-10-31 | Deployment Tooling | Added zero-cost Cloudflare tunnel script and Vite proxy | Configured same-origin proxy in `vite.config.ts`, relative API baseUrl fallback, and `scripts/tunnel.ps1` for free remote demos |
+| 2026-10-31 | Vercel Launch | Deployed Ceravox frontend to https://ceravox-nova.vercel.app | Configured `vercel.json` SPA rewrite, set `VITE_API_BASE_URL` to backend Cloudflare tunnel, CORS updated to Vercel origin |
