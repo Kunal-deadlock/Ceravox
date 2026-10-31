@@ -127,3 +127,20 @@ def test_logout_invalidates_session(client) -> None:
 
 def test_protected_route_rejects_anonymous_requests(client) -> None:
     assert client.get("/v1/app/status").status_code == 401
+
+
+def test_register_creates_account_and_session(client, db_session) -> None:
+    token = csrf(client)
+    response = client.post(
+        "/v1/auth/register",
+        json={"email": "newuser@example.test", "password": PASSWORD},
+        headers={"X-CSRF-Token": token},
+    )
+    assert response.status_code == 201
+    assert response.json()["email"] == "newuser@example.test"
+    assert "ceravox_session=" in response.headers["set-cookie"]
+
+    # Verify protected route works with new session
+    me = client.get("/v1/auth/me")
+    assert me.status_code == 200
+    assert me.json()["email"] == "newuser@example.test"

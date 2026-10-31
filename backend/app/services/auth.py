@@ -64,6 +64,39 @@ class AuthService:
         db.refresh(user)
         return user
 
+    def register_user(self, db: Session, email: str, password: str) -> tuple[User, str]:
+        normalized_email = normalize_email(email)
+        if not validate_password_strength(password):
+            raise AuthServiceError(
+                "weak_password",
+                "Password must be at least 12 characters and use three character classes",
+                422,
+            )
+        if db.scalar(select(User.id).where(User.email == normalized_email)) is not None:
+            raise AuthServiceError("email_taken", "An account with this email already exists", 409)
+        is_first = db.scalar(select(User.id)) is None
+        user = User(
+            email=normalized_email,
+            password_hash=hash_password(password),
+            is_admin=is_first,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+        raw_token = generate_token()
+        now = datetime.now(UTC)
+        db.add(
+            SessionRecord(
+                user_id=user.id,
+                token_hash=hash_token(raw_token),
+                expires_at=now + timedelta(seconds=self.settings.session_ttl_seconds),
+                created_at=now,
+            )
+        )
+        db.commit()
+        return user, raw_token
+
     def login(self, db: Session, email: str, password: str) -> tuple[User, str]:
         normalized_email = email.strip().lower()
         key = normalized_email or "<empty>"

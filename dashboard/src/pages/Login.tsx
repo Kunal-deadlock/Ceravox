@@ -1,11 +1,12 @@
 import { FormEvent, useState } from "react";
 
-import { login } from "../lib/api";
+import { login, registerUser } from "../lib/api";
 import type { UserProfile } from "../lib/api";
 
 type LoginProps = { onAuthenticated: (user: UserProfile) => void };
 
 export function Login({ onAuthenticated }: LoginProps) {
+  const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -16,9 +17,17 @@ export function Login({ onAuthenticated }: LoginProps) {
     setSubmitting(true);
     setError(null);
     try {
-      onAuthenticated(await login(email, password));
-    } catch {
-      setError("Invalid email or password");
+      if (mode === "signup") {
+        onAuthenticated(await registerUser(email, password));
+      } else {
+        onAuthenticated(await login(email, password));
+      }
+    } catch (err: unknown) {
+      if (mode === "signup") {
+        setError(err instanceof Error ? err.message : "Registration failed. Ensure password is at least 12 characters with 3 character types.");
+      } else {
+        setError("Invalid email or password");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -27,17 +36,88 @@ export function Login({ onAuthenticated }: LoginProps) {
   return (
     <main className="auth-layout">
       <section className="auth-card" aria-labelledby="login-title">
-        <p className="eyebrow">CERAVOX / LOCAL ACCESS</p>
-        <h1 id="login-title">Log in to Ceravox</h1>
-        <p className="muted">Use the local administrator account to continue.</p>
+        <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
+          <button
+            type="button"
+            className={mode === "login" ? "" : "button-secondary"}
+            onClick={() => {
+              setMode("login");
+              setError(null);
+            }}
+            style={{ flex: 1, padding: "8px 14px", fontSize: "0.85rem" }}
+          >
+            Sign In
+          </button>
+          <button
+            type="button"
+            className={mode === "signup" ? "" : "button-secondary"}
+            onClick={() => {
+              setMode("signup");
+              setError(null);
+            }}
+            style={{ flex: 1, padding: "8px 14px", fontSize: "0.85rem" }}
+          >
+            Create Account
+          </button>
+        </div>
+
+        <p className="eyebrow">CERAVOX / {mode === "signup" ? "NEW ACCOUNT" : "LOCAL ACCESS"}</p>
+        <h1 id="login-title">{mode === "signup" ? "Create your Ceravox account" : "Log in to Ceravox"}</h1>
+        <p className="muted">
+          {mode === "signup"
+            ? "Create a local account on this machine. No cloud calls or accounts required."
+            : "Use your local account to access your private voice workstation."}
+        </p>
+
         <form onSubmit={submit}>
           <label htmlFor="email">Email</label>
-          <input id="email" type="email" autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} required />
+          <input
+            id="email"
+            type="email"
+            autoComplete="username"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
+
           <label htmlFor="password">Password</label>
-          <input id="password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required />
+          <input
+            id="password"
+            type="password"
+            autoComplete={mode === "signup" ? "new-password" : "current-password"}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+            minLength={mode === "signup" ? 12 : undefined}
+          />
+          {mode === "signup" && (
+            <p className="field-hint" style={{ margin: "2px 0 6px" }}>
+              Password must be at least 12 characters and use uppercase, lowercase, numbers, or symbols.
+            </p>
+          )}
+
           {error && <p className="form-error" role="alert">{error}</p>}
-          <button type="submit" disabled={submitting}>{submitting ? "Logging in…" : "Log in"}</button>
+
+          <button type="submit" disabled={submitting}>
+            {submitting ? (mode === "signup" ? "Creating account…" : "Logging in…") : (mode === "signup" ? "Sign up" : "Log in")}
+          </button>
         </form>
+
+        <div style={{ marginTop: "16px", textAlign: "center" }}>
+          <button
+            type="button"
+            className="link-button"
+            onClick={() => {
+              setMode(mode === "login" ? "signup" : "login");
+              setError(null);
+            }}
+            style={{ fontSize: "0.85rem" }}
+          >
+            {mode === "login"
+              ? "Don't have an account? Sign up here"
+              : "Already have an account? Log in here"}
+          </button>
+        </div>
       </section>
     </main>
   );

@@ -165,3 +165,11 @@ export async function logout(): Promise<void> {
   });
   csrfToken = null;
 }
+
+export async function registerUser(email: string, password: string): Promise<UserProfile> {
+  return request<UserProfile>("/v1/auth/register", {
+    method: "POST",
+    headers: await csrfHeaders(),
+    body: JSON.stringify({ email, password }),
+  });
+}

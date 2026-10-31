@@ -78,6 +78,29 @@ def setup(payload: Credentials, db: Db) -> UserResponse:
         ) from error
 
 
+@router.post(
+    "/auth/register",
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_csrf)],
+)
+async def register(payload: Credentials, db: Db, response: Response) -> UserResponse:
+    try:
+        user, raw_token = service().register_user(db, payload.email, payload.password)
+    except AuthServiceError as error:
+        raise auth_error(error) from error
+    settings = get_settings()
+    response.set_cookie(
+        SESSION_COOKIE,
+        raw_token,
+        max_age=settings.session_ttl_seconds,
+        httponly=True,
+        secure=settings.cookie_secure,
+        samesite="lax",
+        path="/",
+    )
+    return safe_user(user)
+
+
 @router.post("/auth/login", dependencies=[Depends(require_csrf)])
 async def login(payload: Credentials, db: Db, response: Response) -> UserResponse:
     try:
