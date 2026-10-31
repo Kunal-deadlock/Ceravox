@@ -66,3 +66,4 @@ describe("Truthful companion capability guards", () => {
     expect(screen.getByRole("button", { name: "Ask locally" })).toBeDisabled();
   });
 });
+
