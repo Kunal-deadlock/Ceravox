@@ -6,6 +6,9 @@ import { LiveAssistant } from "../pages/LiveAssistant";
 const api = vi.hoisted(() => ({
   askAssistant: vi.fn(),
   generateSpeech: vi.fn(),
+  getModels: vi.fn().mockResolvedValue({
+    ollama: { available: true },
+  }),
   transcribeAudio: vi.fn(),
 }));
 vi.mock("../lib/api", () => api);
